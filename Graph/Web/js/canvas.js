@@ -129,6 +129,8 @@
       const r = host.getBoundingClientRect();
       const cv = pp.createCanvas(r.width, r.height);
       cv.parent(host);
+      cv.elt.setAttribute("role", "img");
+      cv.elt.setAttribute("aria-label", "円錐配置の依存グラフ。キーボードで各宣言を操作するには階層表示に切り替えてください。");
       pp.pixelDensity(Math.min(2, window.devicePixelRatio || 1));
       pp.textFont("ui-monospace, SFMono-Regular, Menlo, monospace");
       pp.frameRate(60);
@@ -153,6 +155,7 @@
       /* 目標位置へ極座標のまま補間する。x,y で補間すると、角度が変わったとき
          ノードが中心を横切って直線的に飛び、どの扇から来たのか分からなくなる。
          残差 animDelta は「もう動いていないか」の判定に使う(静止時は描画を止める)。 */
+      const reducedMotion=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       let animDelta = 0;
       const live = {};
       for (const [n, t] of Object.entries(dv.posAll)) {
@@ -162,7 +165,7 @@
           Math.abs(t.r - a.r),
           Math.abs(t.th - a.th) * (a.r + 60),
           60 * (1 - a.o));
-        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { a.r=t.r; a.th=t.th; a.o=1; }
+        if (reducedMotion) { a.r=t.r; a.th=t.th; a.o=1; }
         a.r += (t.r - a.r) * 0.24;
         a.th = lerpAngle(a.th, t.th, 0.24);
         a.o += (1 - a.o) * 0.2;

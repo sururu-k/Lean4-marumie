@@ -14,6 +14,10 @@
     const el = document.getElementById(id);
     if (el) el.innerHTML = `<svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]}</svg>`;
   }
+  document.getElementById('reportOptionsToggle').addEventListener('click',e=>{
+    const open=document.getElementById('reportDlg').classList.toggle('report-options-open');
+    e.currentTarget.setAttribute('aria-expanded',String(open));e.currentTarget.textContent=open?'レポートの設定を閉じる':'レポートの設定を開く';
+  });
   document.getElementById('graphEmptyLoad').addEventListener('click', () => document.getElementById('btnData').click());
   document.getElementById('graphSettings').open = innerWidth > 700;
   const updateFilters = () => {

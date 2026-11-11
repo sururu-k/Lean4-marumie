@@ -45,7 +45,7 @@
   const api={active:true,layoutGraph};
   function fit(all=false){
     const w=host.clientWidth,h=host.clientHeight;
-    zoom=Math.max(all?.3:.85,Math.min(1,(w-32)/model.width,(h-100)/model.height));
+    zoom=Math.max(all?.08:.85,Math.min(1,(w-32)/model.width,(h-100)/model.height));
     pan={x:Math.max(16,(w-model.width*zoom)/2),y:48+Math.max(0,(h-100-model.height*zoom)/2)};
   }
   function transform(){stage.style.width=model.width+'px';stage.style.height=model.height+'px';stage.style.transform=`translate(${pan.x}px,${pan.y}px) scale(${zoom})`;document.getElementById('graphZoom').textContent=`${Math.round(zoom*100)}%`;}
@@ -97,6 +97,11 @@
       if(focused){const el=[...stage.querySelectorAll('[data-flow-node]')].find(e=>e.dataset.flowNode===focused);el?.focus({preventScroll:true});}
     }
     transform();
+    if(auto){
+      const center=model.nodes[dv.center];
+      if(center&&model.height*zoom>host.clientHeight-100)host.scrollTop=Math.max(0,pan.y+(center.y+center.h/2)*zoom-host.clientHeight*.6);
+      else host.scrollTop=0;
+    }
   }
   function setMode(value){
     mode=value;api.active=mode==='layers';document.getElementById('canvasHost').dataset.layout=mode;
@@ -128,6 +133,6 @@
     S.subscribe(render);new ResizeObserver(()=>{auto=true;render();}).observe(host);
     setMode(localStorage.getItem('ldr-graph-layout')==='radial'?'radial':'layers');
   }
-  Object.assign(api,{mount,render,reset(){auto=false;fit(true);transform();},zoomBy(f){auto=false;const old=zoom;zoom=Math.max(.3,Math.min(2.5,zoom*f));pan.x=host.clientWidth/2-(host.clientWidth/2-pan.x)*zoom/old;pan.y=host.clientHeight/2-(host.clientHeight/2-pan.y)*zoom/old;transform();}});
+  Object.assign(api,{mount,render,reset(){auto=false;host.scrollTop=0;host.scrollLeft=0;fit(true);transform();},zoomBy(f){auto=false;const old=zoom;zoom=Math.max(.3,Math.min(2.5,zoom*f));pan.x=host.clientWidth/2-(host.clientWidth/2-pan.x)*zoom/old;pan.y=host.clientHeight/2-(host.clientHeight/2-pan.y)*zoom/old;transform();}});
   LDR.flow=api;
 })(typeof window==='undefined'?{}:(window.LDR=window.LDR||{}));

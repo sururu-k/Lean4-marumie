@@ -140,7 +140,7 @@
       class="flex items-center gap-1.5 cursor-pointer rounded-b-md bg-white/95 dark:bg-stone-900/95 backdrop-blur-sm
              border-b border-stone-200 dark:border-stone-700 shadow-sm">
       ${rail(s.hue, pad)}
-      <span ${s.cluster ? `data-cluster="${esc(s.cluster)}"` : `data-tree="${esc(s.key)}"`} class="text-xs text-stone-400 w-2 cursor-pointer" title="この枝を畳む">▾</span>
+      <button aria-label="この枝を畳む" ${s.cluster ? `data-cluster="${esc(s.cluster)}"` : `data-tree="${esc(s.key)}"`} class="text-xs text-stone-400 w-2 cursor-pointer" title="この枝を畳む">▾</button>
       <span class="font-mono text-xs text-stone-500 dark:text-stone-400 truncate flex-1">${esc(s.label)}</span>
       <span class="text-xs text-stone-400 pr-2">${s.count}</span>
     </div>`;

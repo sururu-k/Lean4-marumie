@@ -406,11 +406,11 @@
 </div>
 
 <!-- ============ データ読み込み ============ -->
-<dialog id="dataDlg" class="rounded-xl p-0 w-[min(760px,92vw)] bg-white dark:bg-stone-900
+<dialog aria-labelledby="dataTitle" id="dataDlg" class="rounded-xl p-0 w-[min(760px,92vw)] bg-white dark:bg-stone-900
         text-stone-900 dark:text-stone-100 shadow-sm border border-stone-200 dark:border-stone-700">
   <div class="p-4 space-y-3">
     <div class="flex items-center justify-between">
-      <h2 class="text-base font-medium">レポートの読み込み</h2>
+      <h2 id="dataTitle" class="text-base font-medium">レポートの読み込み</h2>
       <button id="dataClose" aria-label="読み込みを閉じる" class="w-8 h-8 rounded-md hover:bg-stone-100 dark:hover:bg-stone-800">✕</button>
     </div>
 
@@ -433,10 +433,11 @@
     <input id="fileInput" aria-label="レポートファイルを選択" type="file" accept=".jsonl,.json,.txt"
            class="text-base file:mr-2 file:px-2 file:py-1 file:rounded-sm file:border-0
                   file:bg-stone-200 dark:file:bg-stone-700 file:text-base">
-    <textarea id="dataText" aria-label="JSONLレポートの内容" rows="9" spellcheck="false"
+    <textarea id="dataText" aria-describedby="dataError" aria-label="JSONLレポートの内容" rows="9" spellcheck="false"
       class="w-full font-mono text-base leading-relaxed p-2 rounded-lg
              bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-700 focus-visible:outline-2
              focus:border-indigo-400"></textarea>
+    <p id="dataError" role="alert" hidden></p>
     <div class="flex justify-end gap-2">
       <button id="dataApply" class="px-3 py-1.5 rounded-md text-sm bg-indigo-600 text-white hover:bg-indigo-500">貼り付けた内容を読み込む</button>
     </div>
@@ -447,16 +448,17 @@
      右端に縦いっぱいの差し込み（モーダルではない。CSS は上の #reportDlg）。左の列が操作（主語・深さ・
      全章／要約・章の選択。説明は最下部）、右の列がプレビュー。章を変えるとその場で作り直す。
      外を押す・Esc・✕ で閉じる。 -->
-<dialog id="reportDlg" class="p-0 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 shadow-sm
+<dialog aria-labelledby="reportTitle" id="reportDlg" class="p-0 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 shadow-sm
         border-l border-stone-200 dark:border-stone-700">
   <div class="h-full flex flex-col">
     <div class="shrink-0 px-3 py-1.5 flex items-center gap-2 border-b border-stone-200 dark:border-stone-700">
-      <h2 class="text-sm font-medium shrink-0">レポート</h2>
+      <h2 id="reportTitle" class="text-sm font-medium shrink-0">レポート</h2>
       <span id="reportDlgInfo" class="text-xs text-stone-500 truncate min-w-0 flex-1"></span>
       <button id="reportDlgCopy" class="px-2.5 py-1 rounded-md text-xs bg-indigo-600 text-white hover:bg-indigo-500 shrink-0">コピー</button>
       <button id="reportDlgSave" class="px-2.5 py-1 rounded-md text-xs border border-stone-300 dark:border-stone-600 hover:bg-stone-100 dark:hover:bg-stone-800 shrink-0">.md で保存</button>
       <button id="reportDlgClose" aria-label="レポートを閉じる" class="w-7 h-7 rounded-md hover:bg-stone-100 dark:hover:bg-stone-800 shrink-0" title="閉じる (Esc)">✕</button>
     </div>
+    <button id="reportOptionsToggle" aria-expanded="false" aria-controls="reportOpts">レポートの設定を開く</button>
     <div class="flex-1 min-h-0 flex">
       <aside id="reportOpts" class="w-[248px] shrink-0 overflow-y-auto p-2 space-y-2 text-xs border-r border-stone-200 dark:border-stone-700">
         <div class="flex items-center gap-1 flex-wrap" id="reportSubject"></div>

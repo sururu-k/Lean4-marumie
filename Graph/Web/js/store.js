@@ -796,6 +796,9 @@
   const actions = {
     loadText(text, opts) {
       const r = G.parseJsonl(text);
+      if (opts && opts.rejectInvalid && (r.errors.length || !Object.keys(r.nodes).length)) {
+        return { ok:false, message:r.errors[0] || "宣言が見つかりません。JSONLレポートを選んでください。" };
+      }
       state.rawText = text;
       state.nodes = r.nodes; state.errors = r.errors; state.order = r.order;
       state.hist = { nodes: {}, order: [], curId: null, seq: 0 };
@@ -807,6 +810,7 @@
       // 履歴は既定中心から始める（最初に見ているのはそれ。戻る先として残す）
       if (derived.center && state.nodes[derived.center]) { previewPush(derived.center); emit(); }
       if (!opts || !opts.silent) LDR.onDataLoaded && LDR.onDataLoaded(text);
+      return { ok:true };
     },
     navigate(n) {
       if (!n) return;

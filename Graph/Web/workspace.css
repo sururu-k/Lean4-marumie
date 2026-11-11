@@ -220,3 +220,24 @@ dialog, #sidebar, #sideR { overscroll-behavior: contain; }
 @media (min-width: 701px) { #workspaceMenu { display: none; } }
 .graph-legend .legend-ref-value::before { border-top-style: dashed; border-top-color: #c2410c; }
 #declList button[data-tree] { min-width: 24px; min-height: 32px; }
+#reportOptionsToggle { display: none; }
+#reportDlg > div > div:first-child { padding: 12px; }
+#reportOpts { padding: 12px; }
+#reportOpts label { line-height: 1.65; gap: 8px; padding-block: 4px; }
+#reportOpts input[type='checkbox'] { width: 16px; height: 16px; flex: none; accent-color: #4f46e5; }
+#reportText { font-size: var(--ui-sm); line-height: 1.8; padding: 20px; }
+#dataDlg { max-height: 90dvh; overflow: auto; }
+#dataDlg h2 { font-size: var(--ui-lg); }
+#dataText { padding: 12px; }
+#dataError { color: #be123c; font-size: var(--ui-sm); padding: 12px; background: #fff1f2; border-radius: var(--ui-radius); }
+.dark #dataError { color: #fecdd3; background: #4c0519; }
+@media (max-width:700px) {
+  #reportOptionsToggle { display: block; padding: 12px; text-align: left; font-size: var(--ui-sm); color: var(--ui-accent); border-bottom: 1px solid var(--ui-line); }
+  #reportOpts { display: none; }
+  .report-options-open #reportOpts { display: block; }
+  #reportText { font-size: var(--ui-md); padding: 16px; }
+}
+#depBody .pv :is(.cl, .fig-rule > b, .meta b, .src .no, .src .tx, .sq .ts) { font-size: var(--ui-xs); line-height: 1.65; }
+#depBody .pv :is(.lbl, .args, .meta, .sq .ts) { color: var(--ui-muted); }
+#depBody .pv .src .cm { color: #567053; }
+.dark #depBody .pv .src .cm { color: #a3c29f; }

@@ -379,13 +379,14 @@
 
     // データ読み込み
     $("btnData").addEventListener("click", async () => {
+      $("dataError").hidden = true; $("dataText").removeAttribute("aria-invalid");
       $("dataStatus").textContent = "既定の監査結果を探しています…";
       $("dataStatus").style.whiteSpace = "pre-line";
       $("dataDlg").showModal();
       const d = await getDefaultReport();
       let status = d
         ? `既定の監査結果: ${(d.length / 1048576).toFixed(1)} MB / ${d.split("\n").filter(Boolean).length} 宣言`
-        : "既定の監査結果は未生成です。Graph で `node make_default_report.js` を実行すると埋め込まれます。";
+        : "既定のレポートはありません。ファイルを選ぶか、サンプルで試してください。";
       // 来歴(report.meta.json 由来)。何の・いつの・どの環境の解析かを常に同定できるようにする
       const m = LDR.DEFAULT_META;
       if (d && m && m.target) {
@@ -418,8 +419,13 @@
     });
     $("dataApply").addEventListener("click", () => {
       const t = $("dataText").value;
-      if (t.trim()) { S.actions.loadText(t); toast("読み込みました"); }
-      $("dataDlg").close();
+      const result = S.actions.loadText(t, {rejectInvalid:true});
+      if (!result.ok) {
+        $("dataError").textContent = result.message; $("dataError").hidden = false;
+        $("dataText").setAttribute("aria-invalid", "true"); $("dataText").focus(); return;
+      }
+      $("dataError").hidden = true; $("dataText").removeAttribute("aria-invalid");
+      toast("読み込みました"); $("dataDlg").close();
     });
     $("dataForget").addEventListener("click", async () => {
       await DB.del("report");
@@ -440,8 +446,8 @@
       if (f.name.endsWith(".json") && text.includes('"ldr-pins"')) {
         toast(S.actions.importPins(text).msg);
       } else {
-        S.actions.loadText(text);
-        toast(`${f.name} を読み込みました`);
+        const result = S.actions.loadText(text, {rejectInvalid:true});
+        toast(result.ok ? `${f.name} を読み込みました` : `読み込めません。${result.message}`);
       }
     });
 
