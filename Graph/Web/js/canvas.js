@@ -111,7 +111,8 @@
 
   function worldOf(mx, my, st, w, h) {
     const k = st.view.k == null ? fitK : st.view.k;
-    return { x: (mx - w / 2 - st.view.tx) / k, y: (my - h / 2 - st.view.ty) / k };
+    const b=S.derived.bbox;
+    return { x: (mx - w / 2 - st.view.tx) / k+(b.x0+b.x1)/2, y: (my - h / 2 - st.view.ty) / k+(b.y0+b.y1)/2 };
   }
 
   function lerpAngle(a, b, t) {
@@ -139,6 +140,7 @@
     };
 
     pp.draw = function () {
+      if (LDR.flow?.active) { pp.noLoop(); return; }
       const st = S.state, dv = S.derived, c = pal();
       pp.clear();
       pp.background(c.bg);
@@ -160,6 +162,7 @@
           Math.abs(t.r - a.r),
           Math.abs(t.th - a.th) * (a.r + 60),
           60 * (1 - a.o));
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { a.r=t.r; a.th=t.th; a.o=1; }
         a.r += (t.r - a.r) * 0.24;
         a.th = lerpAngle(a.th, t.th, 0.24);
         a.o += (1 - a.o) * 0.2;
@@ -180,7 +183,8 @@
       const NH = S.NODE_H;
 
       pp.push();
-      pp.translate(W / 2 + st.view.tx, H / 2 + st.view.ty);
+      const b=dv.bbox;
+      pp.translate(W / 2 + st.view.tx-(b.x0+b.x1)/2*k, H / 2 + st.view.ty-(b.y0+b.y1)/2*k);
       pp.scale(k);
 
       /* ---- 扇と層の輪郭 ---- */
@@ -729,6 +733,7 @@
     }
 
     pp.mouseMoved = function () {
+      if (LDR.flow?.active) return;
       pp.loop();          // 眠っていたら起こす(ホバーカードの追従にも必要)
       const st = S.state;
       const w = worldOf(pp.mouseX, pp.mouseY, st, pp.width, pp.height);
@@ -738,6 +743,7 @@
     };
 
     pp.mousePressed = function () {
+      if (LDR.flow?.active) return;
       pp.loop();
       /* 副ボタンは履歴移動に使うので、左ボタンのみ扱う。
          p5 1.x の mouseButton は "left" 等の文字列、2.x は {left,right,center} の
@@ -751,6 +757,7 @@
     };
 
     pp.mouseDragged = function () {
+      if (LDR.flow?.active) return;
       pp.loop();
       if (!drag) return;
       const dx = pp.mouseX - drag.x, dy = pp.mouseY - drag.y;
@@ -759,6 +766,7 @@
     };
 
     pp.mouseReleased = function () {
+      if (LDR.flow?.active) return;
       pp.loop();
       if (!drag) return;
       const moved = drag.moved; drag = null;
@@ -785,6 +793,7 @@
     };
 
     pp.mouseWheel = function (e) {
+      if (LDR.flow?.active) return;
       /* p5 のホイールは window で受ける。キャンバスの矩形の中でも、その上に別の要素（レポートの
          プレビュー等）が重なっていればその要素のスクロールであって拡大縮小ではない。実際の対象で判定する
          （プレビューの上でホイールを回すと下のキャンバスが拡大し、文章が動かなかった。実測） */
@@ -847,9 +856,9 @@
     hueOf,                                   // 左の一覧の名前空間の色も同じ関数で決める
     targetPackage,                           // 右パネルのパッケージ表示も同じ判定を使う
 
-    zoomIn: () => S.actions.zoomBy(1.18, fitK),
-    zoomOut: () => S.actions.zoomBy(1 / 1.18, fitK),
-    reset: () => S.actions.resetView(),
+    zoomIn: () => LDR.flow?.active ? LDR.flow.zoomBy(1.18) : S.actions.zoomBy(1.18, fitK),
+    zoomOut: () => LDR.flow?.active ? LDR.flow.zoomBy(1 / 1.18) : S.actions.zoomBy(1 / 1.18, fitK),
+    reset: () => LDR.flow?.active ? LDR.flow.reset() : S.actions.resetView(),
     get fitK() { return fitK; },
   };
 })(window.LDR = window.LDR || {});

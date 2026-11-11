@@ -99,7 +99,7 @@
     if ((e.ctrlKey || e.metaKey) && (k === "y" || (k === "z" && e.shiftKey))) { e.preventDefault(); S.actions.forward(); return; }
     if (e.ctrlKey || e.metaKey) return;
 
-    if (e.key === "/") { e.preventDefault(); $("search").focus(); return; }
+    if (e.key === "/") { e.preventDefault(); if ($("sidebar").classList.contains("hidden")) toggleAside($("sidebar"), "left"); $("search").focus(); return; }
     if (e.key === "Backspace" || (e.altKey && e.key === "ArrowLeft")) { e.preventDefault(); S.actions.back(); return; }
     if (e.altKey && e.key === "ArrowRight") { e.preventDefault(); S.actions.forward(); return; }
     if (e.key === "0") { C.reset(); return; }
@@ -235,7 +235,7 @@
          幅が足りない画面では左の一覧は重ね表示（drawer）になるので、ここでの上限は三枚並ぶ画面の話 */
       const min = which === "left" ? 220 : 280;
       const cap = Math.max(min, Math.round(window.innerWidth * (which === "left" ? 0.3 : 0.5)));
-      const def = which === "left" ? 280 : 330;
+      const def = which === "left" ? 280 : 380;
       el.style.width = Math.max(min, Math.min(Number.isFinite(saved) ? saved : def, cap)) + "px";
     }
 
@@ -292,6 +292,7 @@
       if (Array.isArray(pins)) S.actions.setPins(pins);
     } catch (e) { /* 同上 */ }
 
+    LDR.flow.mount();
     C.mount($("canvasHost"));
     S.subscribe(P.renderAll);
     S.refresh(true);

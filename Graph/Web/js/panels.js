@@ -48,7 +48,7 @@
 
      先頭に見えている行の祖先（枝の見出し）は、一覧の上端に固定して重ねる。
      長い枝の途中で「いまどの枝の中か」を文字でも示す。 */
-  const ROW_H = 29;
+  const ROW_H = 36;
   const UNIT = 14;                              // 一段の字下げ
   const colX = (k) => 8 + k * UNIT;             // 列 k のガイド線の x（見出しの ▾ の中央）
   const V = { host: null, win: null, spacer: null, sticky: null, rows: [], top: 0, raf: 0, wantReveal: -1 };
@@ -346,8 +346,8 @@
       html: `<div style="height:${ROW_H}px;padding-left:${pad}px;position:relative"
         class="w-full flex items-center gap-1.5 rounded-md ${rowCls(name, st, cen)}">
         ${guides(g)}${rail(hue, pad)}
-        <span data-tree="${esc(key)}" class="text-xs text-stone-400 w-2 cursor-pointer select-none"
-              title="${closed ? "名前空間を開く" : "名前空間を畳む"}">${closed ? "▸" : "▾"}</span>
+        <button aria-label="${closed ? "名前空間を開く" : "名前空間を畳む"}" aria-expanded="${!closed}" data-tree="${esc(key)}" class="text-xs text-stone-400 w-2 cursor-pointer select-none"
+              title="${closed ? "名前空間を開く" : "名前空間を畳む"}">${closed ? "▸" : "▾"}</button>
         <button data-sel="${esc(name)}" title="${esc(rowTitle(name, st))}" class="min-w-0 flex-1 flex items-center gap-2 text-left">
           ${dot(nd.kind, 6)}
           ${nameHtml(splitName(name).last)}
@@ -366,14 +366,14 @@
     const pad = 4 + (depth || 0) * UNIT;
     const caret = closed ? "▸" : "▾";
     return {
-      html: `<div data-tree="${esc(prefix)}" style="height:${ROW_H}px;padding-left:${pad}px;position:relative" title="${esc(title || prefix)}"
+      html: `<button aria-expanded="${!closed}" data-tree="${esc(prefix)}" style="height:${ROW_H}px;padding-left:${pad}px;position:relative" title="${esc(title || prefix)}"
         class="w-full flex items-center gap-1.5 cursor-pointer bg-stone-50/70 dark:bg-stone-800/40 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-md">
         ${guides(g)}${rail(hue, pad)}
         <span class="text-xs text-stone-400 w-2">${caret}</span>
         <span class="font-mono text-xs text-stone-500 dark:text-stone-400 truncate flex-1">${esc(label)}</span>
         ${closed && marked ? MARK_DOT : ""}
         <span class="text-xs text-stone-400 pr-2">${count}</span>
-      </div>`,
+      </button>`,
     };
   }
 
@@ -1206,7 +1206,7 @@
         <span class="text-xs text-stone-400 tabular-nums">${h.length ? `${pos + 1}/${h.length}` : ""}</span>
         ${navBtn("data-pfwd", "›", pos < h.length - 1, "次に見た宣言へ（] キー）")}
       </div>
-      ${chips ? `<div class="flex gap-1 px-1 pb-1.5 overflow-x-auto" style="scrollbar-width:thin" title="見た順。押すとその宣言を見て、グラフで選択する">${chips}</div>` : ""}
+      ${h.length > 1 ? `<details class="preview-history"><summary>見た宣言 ${h.length}件</summary><div class="flex gap-1 px-1 pb-1.5 overflow-x-auto" style="scrollbar-width:thin" title="見た順">${chips}</div></details>` : ""}
       ${nd ? `<div class="px-1 pb-1.5 border-b border-stone-200 dark:border-stone-700">
         <div class="flex items-center gap-1.5" style="min-height:22px">
           ${role}
@@ -1249,7 +1249,7 @@
     const srcLines = nd.source ? nd.source.split("\n").length : 0;
     const where = `${nd.module}${nd.line ? ":" + nd.line + (nd.lineEnd && nd.lineEnd !== nd.line ? "–" + nd.lineEnd : "") : ""}`;
     const sourceBlock = nd.source
-      ? `<details data-keep="src" class="sec"${open("src", srcLines <= 12)}>
+      ? `<details data-keep="src" class="sec"${open("src", false)}>
           <summary title="${esc(where)}"><span>原文</span><span class="grow font-mono text-stone-400">${esc(shortOf(nd.module))}${nd.line ? ":" + nd.line : ""}</span><span class="text-stone-400">${srcLines} 行</span></summary>
           <div class="src">${sourceHtml(nd.source, nd.line || 1)}</div>
         </details>`
@@ -1264,13 +1264,14 @@
           ${pkgChip(nd)}
           <span class="flex items-center gap-2" style="flex:none;white-space:nowrap">${docLinks(nd, name)}</span>
         </div>
-        ${sourceBlock}
-        <div class="sec">
+        <div class="claim-section"><div class="claim-heading">${nd.isProp?'主張':'型'}</div><div class="claim-formula" translate="no">${esc(nd.conclusion || nd.typeString || '型情報なし')}</div></div>
+        <div class="claim-axioms"><span>公理</span>${axiomChips(nd, st, true)}</div>
+        <details class="sec" data-keep="signature"${open("signature")}><summary>引数・仮定と主張の構造</summary>
           ${signatureBlock(nd) || `<div class="px-2 py-1 text-xs text-stone-400">シグネチャ情報なし</div>`}
-        </div>
+        </details>
         ${nd.docString ? `<div class="text-xs text-stone-600 dark:text-stone-400 leading-relaxed space-y-1 px-0.5">${docHtml(nd.docString)}</div>` : ""}
         <div class="row"><span class="lbl">印</span>${markChips(name, nd, dv, true)}</div>
-        <div class="row"><span class="lbl">公理</span>${axiomChips(nd, st, true)}</div>
+
         <div class="row text-xs text-stone-500">
           <span class="lbl">数値</span>
           <span class="tag" title="主張（型）の節点数">型 ${nd.typeSize || 0}</span><span class="tag" title="証明項・本体の節点数">証明 ${nd.valueSize || 0}</span>
@@ -1278,6 +1279,7 @@
           ${nd.numUniverse ? `<span class="tag" title="宇宙変数の数">宇宙 ${nd.numUniverse}</span>` : ""}
         </div>
         ${depPackages(nd)}
+        ${sourceBlock}
         <details data-keep="deriv" class="sec"${open("deriv")}>
           <summary title="推論図: 前提は横線の上、結論は下。▸ で前提の導出を開く。公理は ★、前提は原始的なものから順。各前提は  仮定 ⊢ 結論  の判断と、持ち込む公理を示す">
             <span>導出図</span>
@@ -1415,7 +1417,7 @@
                  note: `<b>${s} を証明の道具としてのみ使う</b>宣言。主張には現れないので、${s} について何かを述べているわけではない。` },
       };
       // 六つの札が既定の幅（330px）で一行に収まる大きさ（二段に割れていた。実測）
-      const mk = (id, label, title) => `<button data-tab="${id}" title="${esc(title || "")}"
+      const mk = (id, label, title) => `<button data-tab="${id}" aria-pressed="${cur === id}" title="${esc(title || "")}"
         class="px-1 py-0.5 text-xs rounded-md whitespace-nowrap ${cur === id
           ? "bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900"
           : "text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800"}">${label}</button>`;
@@ -1637,7 +1639,7 @@
       st.groupBy, st.density, st.hideFrame,
       Object.keys(st.nodes).length, dv.center].join("|"), () => {
       // 区切りボタンの内側では折り返さない（「モジュ／ール」と割れた。実測）
-      const seg = (id, cur2, opts) => opts.map((o) => `<button data-${id}="${o.v}" title="${esc(o.t || "")}"
+      const seg = (id, cur2, opts) => opts.map((o) => `<button data-${id}="${o.v}" aria-pressed="${cur2 === o.v}" title="${esc(o.t || "")}"
         class="px-1.5 py-0.5 text-xs rounded-md whitespace-nowrap ${cur2 === o.v
           ? "bg-white dark:bg-stone-700 shadow-sm text-stone-900 dark:text-stone-100"
           : "text-stone-500 hover:text-stone-800 dark:hover:text-stone-200"}">${o.l}</button>`).join("");
