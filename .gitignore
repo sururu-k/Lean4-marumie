@@ -2,3 +2,4 @@ node_modules/
 *.tgz
 .l4sb/
 demo/dist/
+demo/public/

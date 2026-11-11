@@ -27,7 +27,10 @@
     "build:demo": "vite build demo --base ./",
     "test:web": "node scripts/test-web.cjs",
     "record:demo": "node scripts/record-demo.cjs",
-    "typecheck": "tsc -p demo"
+    "typecheck": "tsc -p demo",
+    "predemo": "node scripts/prepare-demo.cjs",
+    "prebuild:demo": "node scripts/prepare-demo.cjs",
+    "test:web:states": "node scripts/test-web-states.cjs"
   },
   "devDependencies": {
     "@tailwindcss/cli": "^4.3.5",

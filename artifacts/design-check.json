@@ -1,42 +1,90 @@
 {
-  "before": {
-    "files": [
-      "Graph/Web/index.html"
-    ],
-    "errors": 62,
-    "warnings": 26,
-    "notes": 1,
-    "accessibility": 4
-  },
-  "after": {
-    "files": [
-      "Graph/Web/index.html",
-      "Graph/Web/workspace.css"
-    ],
-    "errors": 0,
-    "warnings": 0,
-    "notes": 0,
-    "accessibility": 0
-  },
-  "browserChecks": {
-    "widths": [
-      1440,
-      768,
-      390,
-      320
-    ],
-    "network": "blocked",
-    "verified": [
-      "graph renders",
-      "search",
-      "report preview and close",
-      "theme toggle",
-      "no horizontal document overflow",
-      "no page errors"
+  "previousRound": {
+    "before": {
+      "files": [
+        "Graph/Web/index.html"
+      ],
+      "errors": 62,
+      "warnings": 26,
+      "notes": 1,
+      "accessibility": 4
+    },
+    "after": {
+      "files": [
+        "Graph/Web/index.html",
+        "Graph/Web/workspace.css"
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "notes": 0,
+      "accessibility": 0
+    },
+    "browserChecks": {
+      "widths": [
+        1440,
+        768,
+        390,
+        320
+      ],
+      "network": "blocked",
+      "verified": [
+        "graph renders",
+        "search",
+        "report preview and close",
+        "theme toggle",
+        "no horizontal document overflow",
+        "no page errors"
+      ]
+    },
+    "limitations": [
+      "No Safari or Firefox validation",
+      "Stageshow sampling contains timing gaps; see demo/REHEARSAL.md"
     ]
   },
-  "limitations": [
-    "No Safari or Firefox validation",
-    "Stageshow sampling contains timing gaps; see demo/REHEARSAL.md"
-  ]
+  "productionViewerReview": {
+    "scope": [
+      "Graph/Web/index.html",
+      "Graph/Web/workspace.css",
+      "Graph/Web/js/flow.js"
+    ],
+    "independentReviewers": [
+      "visual_review",
+      "interface_review"
+    ],
+    "addressed": [
+      "initial graph cropping",
+      "mobile chrome density",
+      "sidebar filter overload",
+      "claim and axiom priority",
+      "small low contrast detail labels",
+      "keyboard node and tree selection",
+      "search shortcut opens sidebar",
+      "native dark color scheme"
+    ],
+    "finalVisualReview": "No remaining must-fix issues in desktop and phone screenshots",
+    "automatedChecks": {
+      "unitTests": 4,
+      "offlineBrowserWidths": [
+        1440,
+        768,
+        390,
+        320
+      ],
+      "stateChecks": [
+        "invalid report preserves data",
+        "empty report recovery",
+        "large graph reveals center",
+        "long declaration name",
+        "mobile report settings",
+        "keyboard search",
+        "reduced motion"
+      ]
+    },
+    "detectorCaveat": "Impeccable source scan retained 6 heuristic flags (contrast, wrapper padding, type hierarchy); these are not a measured browser defect count. The browser review and task-based checks were used to assess the changes.",
+    "recording": "Actual production viewer DOM at 1440x960 and 390x960; no substituted graph or simplified claims",
+    "limitations": [
+      "Chromium only; Safari and Firefox untested",
+      "Real touch hardware untested"
+    ]
+  }
 }

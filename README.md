@@ -70,9 +70,9 @@ node /path/to/Lean4-marumie/bin/l4sb.cjs all
 
 ## Web画面と操作デモを開く
 
-[ビューア](Graph/Web/index.html)はCSSと描画ライブラリを同梱しており、ネット接続なしで開けます。宣言の検索、依存先・参照元の切り替え、右パネルでの確認、Markdownレポートの保存ができます。
+[ビューア](Graph/Web/index.html)はCSSと描画ライブラリを同梱しており、ネット接続なしで開けます。宣言の検索、依存先・参照元の切り替え、右パネルでの確認、Markdownレポートの保存ができます。グラフは階層表示が既定で、従来の円錐表示にも切り替えられます。宣言を選ぶと詳細が開き、「中心にする」でその宣言から探索できます。
 
-操作を紹介する[横長のモック動画](artifacts/lean4-marumie-demo-1104.mp4)と[スマートフォン版](artifacts/lean4-marumie-demo-390.mp4)を用意しています。動画の内容はサンプルデータによる操作イメージです。
+操作を紹介する[デスクトップ版の操作録画](artifacts/lean4-marumie-demo-1440.mp4)と[スマートフォン版](artifacts/lean4-marumie-demo-390.mp4)を用意しています。サンプルデータを本番ビューアで操作した録画です。画面や主張の差し替えはありません。
 
 デモを再生・編集する場合は、開発用の依存を導入して起動します。
 
@@ -81,4 +81,4 @@ npm ci
 npm run demo
 ```
 
-CSSを再生成するには `npm run build:web`、オフラインの画面操作を検査するには `npm run test:web` を使います。画面操作の検査にはChromeまたはChromiumが必要です。実行ファイルは環境変数 `CHROME_PATH` で指定できます。動画の再生成は、デモをポート4174で起動した状態で `npm run record:demo` を実行してください（ffmpegが必要）。
+CSSを再生成するには `npm run build:web`、オフラインの画面操作を検査するには `npm run test:web` を使います。画面操作の検査にはChromeまたはChromiumが必要です。実行ファイルは環境変数 `CHROME_PATH` で指定できます。動画を再生成するには `npm run record:demo` を実行してください（ffmpegが必要）。Viteサーバの起動は不要です。
