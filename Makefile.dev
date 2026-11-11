@@ -29,6 +29,8 @@ build:
 	cd Graph && lake build LeanDeclReport decl_report
 
 verify:
+	node --check Graph/Web/workspace.js
+	node --check scripts/build-web.cjs
 	bash -n Commands/Scripts/l4sb.sh
 	node --check Commands/Scripts/lib/target_info.js
 	node --check Commands/Scripts/lib/verify_manifest.js

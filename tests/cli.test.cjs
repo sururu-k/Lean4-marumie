@@ -40,6 +40,10 @@ test('separate offline viewers preserve reports, metadata and tool assets', () =
       assert.equal(result.status, 0, result.stderr);
       assert.equal(result.stdout.trim(), path.join(dest, 'Web/index.html'));
       assert.ok(fs.existsSync(path.join(dest, 'Web/js/store.js')));
+      for (const asset of ['workspace.css', 'workspace.js', 'assets/app.css', 'assets/p5.min.js']) {
+        assert.ok(fs.existsSync(path.join(dest, 'Web', asset)), asset);
+      }
+      assert.doesNotMatch(fs.readFileSync(path.join(dest, 'Web/index.html'), 'utf8'), /<script[^>]+src="https?:/);
       const context = { window: {} };
       vm.runInNewContext(fs.readFileSync(path.join(dest, 'Web/js/default-report.js'), 'utf8'), context);
       assert.equal(context.window.LDR.DEFAULT_REPORT, sample.window.LDR.SAMPLE);

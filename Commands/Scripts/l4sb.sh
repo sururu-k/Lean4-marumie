@@ -510,7 +510,8 @@ cmd_web() {
   # 入力の隣に独立したビューアを作る。インストール先は変更しない。
   mkdir -p "$web/js"
   if [ "$web" != "$GRAPH_DIR/Web" ]; then
-  cp "$GRAPH_DIR/Web/index.html" "$GRAPH_DIR/Web/index.js" "$web/"
+  cp "$GRAPH_DIR/Web/index.html" "$GRAPH_DIR/Web/index.js" "$GRAPH_DIR/Web/workspace.css" "$GRAPH_DIR/Web/workspace.js" "$web/"
+  cp -R "$GRAPH_DIR/Web/assets" "$web/"
   local asset
   for asset in "$GRAPH_DIR/Web/js/"*.js; do
     case "$(basename -- "$asset")" in default-report.js) continue ;; esac

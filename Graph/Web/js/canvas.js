@@ -605,6 +605,21 @@
       const compactW = 4 + rows.length * 30 + 150 + (pkgRows.length ? 14 * pkgRows.length + 70 : 0) + (selOn ? 124 : 0);
       const hovering = pp.mouseX >= legendRect.x && pp.mouseX <= legendRect.x + legendRect.w
                     && pp.mouseY >= legendRect.y && pp.mouseY <= legendRect.y + legendRect.h;
+      if (W < 500) {
+        const x = 12, y = 12, width = W - 24, cell = width / rows.length;
+        pp.noStroke(); pp.fill(c.panel); pp.rect(x, y, width, 28, 8);
+        rows.forEach((r, i) => {
+          const xx = x + 8 + i * cell;
+          pp.stroke(edgeCol(r.st)); pp.strokeWeight(2);
+          if (r.st.dash) pp.drawingContext.setLineDash(r.st.dash);
+          pp.line(xx, y + 14, xx + 16, y + 14);
+          pp.drawingContext.setLineDash([]);
+          pp.noStroke(); pp.fill(c.muted); pp.textSize(12); pp.textAlign(pp.LEFT, pp.CENTER);
+          pp.text(["型", "値", "主張", "証明"][i], xx + 22, y + 14);
+        });
+        legendRect = { x, y, w: width, h: 28 };
+        return;
+      }
       if (W < 760 || !hovering) {
         const y0 = 14, x0 = 12;
         pp.noStroke(); pp.fill(c.panel);

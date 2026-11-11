@@ -67,3 +67,18 @@ node /path/to/Lean4-marumie/bin/l4sb.cjs all
 解析では対象の `lakefile.lean` を実行し、対象をビルドします。詳しい引数・互換性・制限は [スクリプトの説明](Commands/Scripts/README.md) を参照してください。
 
 開発時の検査は `npm test` と `npm run check`、解析器のビルドは `make -f Makefile.dev build` です。
+
+## Web画面と操作デモを開く
+
+[ビューア](Graph/Web/index.html)はCSSと描画ライブラリを同梱しており、ネット接続なしで開けます。宣言の検索、依存先・参照元の切り替え、右パネルでの確認、Markdownレポートの保存ができます。
+
+操作を紹介する[横長のモック動画](artifacts/lean4-marumie-demo-1104.mp4)と[スマートフォン版](artifacts/lean4-marumie-demo-390.mp4)を用意しています。動画の内容はサンプルデータによる操作イメージです。
+
+デモを再生・編集する場合は、開発用の依存を導入して起動します。
+
+```sh
+npm ci
+npm run demo
+```
+
+CSSを再生成するには `npm run build:web`、オフラインの画面操作を検査するには `npm run test:web` を使います。画面操作の検査にはChromeまたはChromiumが必要です。実行ファイルは環境変数 `CHROME_PATH` で指定できます。動画の再生成は、デモをポート4174で起動した状態で `npm run record:demo` を実行してください（ffmpegが必要）。

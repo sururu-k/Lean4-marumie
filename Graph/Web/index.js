@@ -22,7 +22,7 @@
   function applyTheme(dark) {
     document.documentElement.classList.toggle("dark", dark);
     localStorage.setItem("ldr-theme", dark ? "dark" : "light");
-    $("themeIcon").textContent = dark ? "☾" : "☀";
+    $("themeBtn").setAttribute("aria-pressed", String(dark));
     P.invalidate();          // 配色に依存した HTML を組み直す
     S.refresh();
   }
@@ -223,7 +223,7 @@
     const prefersDark = typeof window.matchMedia === "function"
       && window.matchMedia("(prefers-color-scheme: dark)").matches;
     document.documentElement.classList.toggle("dark", saved ? saved === "dark" : prefersDark);
-    $("themeIcon").textContent = document.documentElement.classList.contains("dark") ? "☾" : "☀";
+    $("themeBtn").setAttribute("aria-pressed", String(document.documentElement.classList.contains("dark")));
 
     /* 保存された幅をそのまま復元すると、以前に広げたまま、あるいは集中表示で
        広げたままの値で中央が潰れることがある。画面幅に対する上限で抑える。 */
@@ -280,10 +280,10 @@
     } else if (def) {
       initial = def; source = "既定の監査結果を読み込みました";
     } else if (LDR.SAMPLE) {
-      initial = LDR.SAMPLE; source = "サンプルを表示しています（データボタンから読み込めます）";
+      initial = LDR.SAMPLE; source = "サンプルを表示しています（「読み込む」からレポートを開けます）";
     } else {
       /* 配置（GitHub Pages）には生成物 js/sample.js を同梱しない。既定の監査結果も無ければ空で始める */
-      initial = ""; source = "レポートがありません（データボタンから読み込めます）";
+      initial = ""; source = "レポートがありません（「読み込む」からレポートを開けます）";
     }
 
     S.actions.loadText(initial, { silent: true });

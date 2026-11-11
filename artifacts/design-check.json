@@ -1,0 +1,42 @@
+{
+  "before": {
+    "files": [
+      "Graph/Web/index.html"
+    ],
+    "errors": 62,
+    "warnings": 26,
+    "notes": 1,
+    "accessibility": 4
+  },
+  "after": {
+    "files": [
+      "Graph/Web/index.html",
+      "Graph/Web/workspace.css"
+    ],
+    "errors": 0,
+    "warnings": 0,
+    "notes": 0,
+    "accessibility": 0
+  },
+  "browserChecks": {
+    "widths": [
+      1440,
+      768,
+      390,
+      320
+    ],
+    "network": "blocked",
+    "verified": [
+      "graph renders",
+      "search",
+      "report preview and close",
+      "theme toggle",
+      "no horizontal document overflow",
+      "no page errors"
+    ]
+  },
+  "limitations": [
+    "No Safari or Firefox validation",
+    "Stageshow sampling contains timing gaps; see demo/REHEARSAL.md"
+  ]
+}

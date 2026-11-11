@@ -140,9 +140,9 @@
       class="flex items-center gap-1.5 cursor-pointer rounded-b-md bg-white/95 dark:bg-stone-900/95 backdrop-blur-sm
              border-b border-stone-200 dark:border-stone-700 shadow-sm">
       ${rail(s.hue, pad)}
-      <span ${s.cluster ? `data-cluster="${esc(s.cluster)}"` : `data-tree="${esc(s.key)}"`} class="text-[9.5px] text-stone-400 w-2 cursor-pointer" title="この枝を畳む">▾</span>
-      <span class="font-mono text-[10.5px] text-stone-500 dark:text-stone-400 truncate flex-1">${esc(s.label)}</span>
-      <span class="text-[10px] text-stone-400 pr-2">${s.count}</span>
+      <span ${s.cluster ? `data-cluster="${esc(s.cluster)}"` : `data-tree="${esc(s.key)}"`} class="text-xs text-stone-400 w-2 cursor-pointer" title="この枝を畳む">▾</span>
+      <span class="font-mono text-xs text-stone-500 dark:text-stone-400 truncate flex-1">${esc(s.label)}</span>
+      <span class="text-xs text-stone-400 pr-2">${s.count}</span>
     </div>`;
   }
 
@@ -251,11 +251,11 @@
      切り詰める。末尾を縮まない指定にすると、深い枝で名前が件数の上に重なる（実測）。 */
   const nameHtml = (shown) => {
     const { prefix, last } = splitName(LDR.sig.userName(shown));
-    return `<span class="font-mono text-[11px] min-w-0 flex-1 flex items-baseline">
+    return `<span class="font-mono text-xs min-w-0 flex-1 flex items-baseline">
       ${prefix ? `<span class="truncate text-stone-400 dark:text-stone-500" style="flex-shrink:999">${esc(prefix)}.</span>` : ""}
       <span class="min-w-0 truncate" style="flex-shrink:1">${esc(last)}</span></span>`;
   };
-  const SORRY_BADGE = '<span class="text-[9.5px] px-1 rounded-sm bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300 shrink-0">sorry</span>';
+  const SORRY_BADGE = '<span class="text-xs px-1 rounded-sm bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300 shrink-0">sorry</span>';
   const MARK_DOT = '<span class="inline-block w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0" title="畳んだ中に中心または選択中の宣言がある"></span>';
   const rowCls = (n, st, cen) =>
     n === cen ? "bg-indigo-50 dark:bg-indigo-950/60 ring-1 ring-indigo-300 dark:ring-indigo-700 text-indigo-900 dark:text-indigo-200"
@@ -305,7 +305,7 @@
         ${guides(g)}
         ${dot(nd.kind, 6)}
         ${nameHtml(rel)}
-        <span class="text-[9px] px-1 rounded-sm bg-stone-100 text-stone-500 dark:bg-stone-800 dark:text-stone-400 shrink-0"
+        <span class="text-xs px-1 rounded-sm bg-stone-100 text-stone-500 dark:bg-stone-800 dark:text-stone-400 shrink-0"
               title="${esc(K ? K.note : nd.originKind)}">${esc(K ? K.ja : nd.originKind)}</span>
         ${nd.usesSorry ? SORRY_BADGE : ""}
       </button>`,
@@ -325,10 +325,10 @@
         title="${esc(title)}"
         class="w-full flex items-center gap-1.5 cursor-pointer hover:bg-stone-100 dark:hover:bg-stone-800 rounded-md">
         ${guides(g)}
-        <span class="text-[9.5px] ${forced ? "text-indigo-500" : "text-stone-400"} w-2">${open ? "▾" : "▸"}</span>
-        <span class="text-[10.5px] text-stone-500 dark:text-stone-400 shrink-0">派生 ${fs.length}</span>
-        <span class="text-[9.5px] text-stone-400 truncate flex-1">${esc(kinds.join(" · "))}</span>
-        ${forced ? '<span class="text-[9px] px-1 rounded-sm bg-indigo-50 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-300 shrink-0">固定</span>' : ""}
+        <span class="text-xs ${forced ? "text-indigo-500" : "text-stone-400"} w-2">${open ? "▾" : "▸"}</span>
+        <span class="text-xs text-stone-500 dark:text-stone-400 shrink-0">派生 ${fs.length}</span>
+        <span class="text-xs text-stone-400 truncate flex-1">${esc(kinds.join(" · "))}</span>
+        ${forced ? '<span class="text-xs px-1 rounded-sm bg-indigo-50 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-300 shrink-0">固定</span>' : ""}
         ${!open && marked ? MARK_DOT : ""}
       </div>`,
     };
@@ -346,7 +346,7 @@
       html: `<div style="height:${ROW_H}px;padding-left:${pad}px;position:relative"
         class="w-full flex items-center gap-1.5 rounded-md ${rowCls(name, st, cen)}">
         ${guides(g)}${rail(hue, pad)}
-        <span data-tree="${esc(key)}" class="text-[9.5px] text-stone-400 w-2 cursor-pointer select-none"
+        <span data-tree="${esc(key)}" class="text-xs text-stone-400 w-2 cursor-pointer select-none"
               title="${closed ? "名前空間を開く" : "名前空間を畳む"}">${closed ? "▸" : "▾"}</span>
         <button data-sel="${esc(name)}" title="${esc(rowTitle(name, st))}" class="min-w-0 flex-1 flex items-center gap-2 text-left">
           ${dot(nd.kind, 6)}
@@ -354,7 +354,7 @@
           ${nd.usesSorry ? SORRY_BADGE : ""}
         </button>
         ${closed && marked ? MARK_DOT : ""}
-        <span class="text-[10px] text-stone-400 pr-2" title="成員（手書き）の数${facets ? "と、Lean が作った派生の数" : ""}">${countText}</span>
+        <span class="text-xs text-stone-400 pr-2" title="成員（手書き）の数${facets ? "と、Lean が作った派生の数" : ""}">${countText}</span>
       </div>`,
     };
   }
@@ -369,10 +369,10 @@
       html: `<div data-tree="${esc(prefix)}" style="height:${ROW_H}px;padding-left:${pad}px;position:relative" title="${esc(title || prefix)}"
         class="w-full flex items-center gap-1.5 cursor-pointer bg-stone-50/70 dark:bg-stone-800/40 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-md">
         ${guides(g)}${rail(hue, pad)}
-        <span class="text-[9.5px] text-stone-400 w-2">${caret}</span>
-        <span class="font-mono text-[10.5px] text-stone-500 dark:text-stone-400 truncate flex-1">${esc(label)}</span>
+        <span class="text-xs text-stone-400 w-2">${caret}</span>
+        <span class="font-mono text-xs text-stone-500 dark:text-stone-400 truncate flex-1">${esc(label)}</span>
         ${closed && marked ? MARK_DOT : ""}
-        <span class="text-[10px] text-stone-400 pr-2">${count}</span>
+        <span class="text-xs text-stone-400 pr-2">${count}</span>
       </div>`,
     };
   }
@@ -637,7 +637,7 @@
         const dead = !on && !cnt;
         return `<button ${attr} ${dead ? "disabled" : ""} aria-pressed="${on}"
           title="${esc(title)}${on ? "（押すと解除）" : dead ? "（該当なし）" : "（押すと一覧をこの条件に絞る）"}"
-          class="px-1.5 py-0.5 rounded-md text-[11px] flex items-center gap-1 whitespace-nowrap ${cls}
+          class="px-1.5 py-0.5 rounded-md text-xs flex items-center gap-1 whitespace-nowrap ${cls}
                  ${dead ? "opacity-40" : ""} ${on ? "ring-2 ring-offset-1 ring-stone-400 dark:ring-stone-500 ring-offset-white dark:ring-offset-stone-900" : "hover:brightness-95 dark:hover:brightness-125"}">
           ${dotColor ? `<span class="w-1.5 h-1.5 rounded-full shrink-0" style="background:${dotColor}"></span>` : ""}${esc(label)}
           <span class="tabular-nums ${on ? "opacity-90" : "opacity-70"}">${cnt}</span></button>`;
@@ -657,7 +657,7 @@
       });
       const active = st.listFilter.size + st.kindFilter.size;
       const clear = active ? `<button data-filter="clear" title="絞り込みを全て解除する"
-          class="px-1.5 py-0.5 rounded-md text-[11px] whitespace-nowrap text-stone-500 hover:bg-stone-100 dark:hover:bg-stone-800 border border-dashed border-stone-300 dark:border-stone-600">✕ 解除 ${active}</button>` : "";
+          class="px-1.5 py-0.5 rounded-md text-xs whitespace-nowrap text-stone-500 hover:bg-stone-100 dark:hover:bg-stone-800 border border-dashed border-stone-300 dark:border-stone-600">✕ 解除 ${active}</button>` : "";
       $("auditBar").innerHTML = `<div class="flex flex-wrap gap-1">${audit.join("")}${clear}</div>`
         + (kindChips.length ? `<div class="flex flex-wrap gap-1 mt-1">${kindChips.join("")}</div>` : "");
 
@@ -667,7 +667,7 @@
             title="${esc("派生 = 由来（構造体・帰納型・構成子・定義）から Lean が機械的に作る宣言（casesOn / rec / mk.inj / sizeOf_spec / eq_1 等）。既定では由来の行とグラフの節点に畳む。"
                 + "☑ で全ての由来を開き、☐ で全て畳む（個別の開閉と同じ集合を操作する）。個別には行の ▸ やグラフの +n で開ける"
                 + (st.openClusters.size && !allOpen ? `。いま ${st.openClusters.size} / ${S.facetOriginCount()} の由来を開いている` : ""))}"
-            class="px-1.5 py-0.5 rounded-md text-[11px] flex items-center gap-1 border whitespace-nowrap
+            class="px-1.5 py-0.5 rounded-md text-xs flex items-center gap-1 border whitespace-nowrap
               ${allOpen ? "bg-stone-900 text-white border-stone-900 dark:bg-stone-100 dark:text-stone-900 dark:border-stone-100"
                         : "bg-white text-stone-600 border-stone-300 hover:bg-stone-100 dark:bg-stone-900 dark:text-stone-300 dark:border-stone-600 dark:hover:bg-stone-800"}">
             <span>${allOpen ? "☑" : "☐"}</span>派生を全て開く <span class="tabular-nums opacity-70">${facets}</span></button>`
@@ -816,7 +816,7 @@
      この区別は「最初に無条件で与えられる定義」「追加の理論や条件を要する定義」
      「条件付きだが無条件のものから無条件に得られる定義」を分けるためのもの。 */
   function condChip(name, nd) {
-    const cls = (c) => `text-[10px] px-1.5 py-0.5 rounded-sm ${c}`;
+    const cls = (c) => `text-xs px-1.5 py-0.5 rounded-sm ${c}`;
     if (nd.numHyp || nd.numInst) {
       return `<span class="${cls("bg-amber-50 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300")}"
         title="仮定 ${nd.numHyp} / インスタンス ${nd.numInst} を要求している">条件 ${nd.numHyp + nd.numInst}</span>`;
@@ -851,7 +851,7 @@
         <div class="min-w-0 flex-1" style="min-width:0;flex:1 1 auto">${rows.join("")}</div>
       </div>` : "";
     const line = (body) => `<div class="sig-line">${body}</div>`;
-    const sub = (t) => `<span class="text-[9.5px] text-stone-400 mr-1">${t}</span>`;
+    const sub = (t) => `<span class="text-xs text-stone-400 mr-1">${t}</span>`;
 
     const argRows = args.map((b) => line(binderHtml(b)));
     const hypRows = hyps.map((b) => line(binderHtml(b)));
@@ -886,9 +886,9 @@
   function markChips(name, nd, dv, inPv) {
     const tag = (t, cls, title) => inPv
       ? `<span class="tag ${cls || ""}" title="${esc(title || "")}">${t}</span>`
-      : `<span class="text-[10px] px-1.5 py-0.5 rounded-sm bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-300 ${cls || ""}" title="${esc(title || "")}">${t}</span>`;
+      : `<span class="text-xs px-1.5 py-0.5 rounded-sm bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-300 ${cls || ""}" title="${esc(title || "")}">${t}</span>`;
     const btnCls = (on) => inPv ? `btn${on ? " on" : ""}`
-      : `text-[10px] px-1.5 py-0.5 rounded-sm border ${on ? "bg-stone-900 text-white border-stone-900 dark:bg-stone-100 dark:text-stone-900" : "bg-white text-stone-700 border-stone-300 hover:bg-stone-100 dark:bg-stone-900 dark:text-stone-200 dark:border-stone-600"}`;
+      : `text-xs px-1.5 py-0.5 rounded-sm border ${on ? "bg-stone-900 text-white border-stone-900 dark:bg-stone-100 dark:text-stone-900" : "bg-white text-stone-700 border-stone-300 hover:bg-stone-100 dark:bg-stone-900 dark:text-stone-200 dark:border-stone-600"}`;
     // 法則の形は命題にだけ意味がある（インスタンス等のデータは構文上 refl の形を持ち得る）
     const sh = nd.isProp ? LDR.sig.SHAPE[nd.shape] : null;
     /* 由来。派生・断片なら「X の派生: 単射性」（押すと由来へ）、由来を持つ側なら「派生 n」（押すと開閉）と「断片 m」 */
@@ -925,10 +925,10 @@
       const on = st.traceTarget === a;
       const tone = bad ? "color:#9f1239;border-color:#fda4af" : extra ? "color:#92400e;border-color:#fcd34d" : "";
       const cls = inPv ? `btn font-mono${on ? " on" : ""}`
-        : `font-mono text-[10.5px] px-1.5 py-0.5 rounded-sm border ${on ? "bg-stone-900 text-white border-stone-900" : "bg-white border-stone-300 hover:bg-stone-100 dark:bg-stone-900 dark:border-stone-600"}`;
+        : `font-mono text-xs px-1.5 py-0.5 rounded-sm border ${on ? "bg-stone-900 text-white border-stone-900" : "bg-white border-stone-300 hover:bg-stone-100 dark:bg-stone-900 dark:border-stone-600"}`;
       return `<button data-trace="${esc(a)}" class="${cls}" style="${on ? "" : tone}"
                 title="${on ? "経路表示を解除" : "中心からこの公理に至る経路をグラフに表示"}">${esc(a)}${on ? " ✕" : ""}</button>`;
-    }).join(" ") || `<span class="text-[11px] text-emerald-600 dark:text-emerald-400">なし（公理非依存）</span>`;
+    }).join(" ") || `<span class="text-xs text-emerald-600 dark:text-emerald-400">なし（公理非依存）</span>`;
   }
 
   /* 中央の見出し。主語は **グラフの中心** に固定する。
@@ -946,10 +946,10 @@
       if (!nd) {
         const modCount = (dv.modIdx && dv.modIdx.count || {})[name];
         el.innerHTML = modCount !== undefined
-          ? `<div class="text-[12.5px] text-stone-500">
-               <span class="text-[10px] px-1.5 py-0.5 rounded-sm bg-indigo-600 text-white mr-1">中心</span>
+          ? `<div class="text-sm text-stone-500">
+               <span class="text-xs px-1.5 py-0.5 rounded-sm bg-indigo-600 text-white mr-1">中心</span>
                <span class="font-mono">${esc(name || "")}</span> はモジュールです（${modCount} 宣言）</div>`
-          : `<div class="text-[12.5px] text-stone-500">
+          : `<div class="text-sm text-stone-500">
                <span class="font-mono">${esc(name || "")}</span> はこのデータにありません
                <span class="text-stone-400">（別のデータで選んだ宣言か、ピンの復元先が無い）</span></div>`;
         return;
@@ -961,20 +961,20 @@
       const { prefix, last } = splitName(LDR.sig.userName(name));
       el.innerHTML = `
         <div class="flex items-center gap-2 min-w-0" title="${esc(name)}">
-          <span class="text-[10px] px-1.5 py-0.5 rounded-sm bg-indigo-600 text-white shrink-0" title="グラフの中心。右パネルは選択中の宣言を出す（追従）か、この中心に固定できる">中心</span>
+          <span class="text-xs px-1.5 py-0.5 rounded-sm bg-indigo-600 text-white shrink-0" title="グラフの中心。右パネルは選択中の宣言を出す（追従）か、この中心に固定できる">中心</span>
           ${dot(nd.kind, 8)}
-          <span class="font-mono text-[12.5px] font-medium min-w-0 flex-1 flex items-baseline">
+          <span class="font-mono text-sm font-medium min-w-0 flex-1 flex items-baseline">
             ${prefix ? `<span class="truncate text-stone-400 dark:text-stone-500 font-normal" style="flex-shrink:999">${esc(prefix)}.</span>` : ""}
             <span class="min-w-0 truncate" style="flex-shrink:1">${esc(last)}</span></span>
         </div>
         <div class="flex items-center gap-1.5 flex-wrap mt-1">
-          <span class="text-[10px] px-1.5 py-0.5 rounded-sm bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 shrink-0">${kinfo(nd.kind).ja}</span>
-          <span class="font-mono text-[9.5px] text-stone-500 shrink-0 whitespace-nowrap" title="${esc(nd.module)}">${esc(shortOf(nd.module))}${nd.line ? ":" + nd.line : ""}</span>
+          <span class="text-xs px-1.5 py-0.5 rounded-sm bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 shrink-0">${kinfo(nd.kind).ja}</span>
+          <span class="font-mono text-xs text-stone-500 shrink-0 whitespace-nowrap" title="${esc(nd.module)}">${esc(shortOf(nd.module))}${nd.line ? ":" + nd.line : ""}</span>
           ${pkgChip(nd)}
           ${markChips(name, nd, dv, false)}
           ${nd.axioms.length
-            ? `<span class="text-[10px] text-stone-500">公理</span>${axiomChips(nd, st, false)}`
-            : `<span class="text-[10px] text-emerald-600 dark:text-emerald-400">公理非依存</span>`}
+            ? `<span class="text-xs text-stone-500">公理</span>${axiomChips(nd, st, false)}`
+            : `<span class="text-xs text-emerald-600 dark:text-emerald-400">公理非依存</span>`}
         </div>`;
     });
   }
@@ -994,12 +994,12 @@
       style="border-color:${col}66">
       <div class="flex items-center gap-1.5">
         ${dot(nd.kind, 6)}
-        <span class="font-mono text-[10.5px] truncate flex-1">${esc(shortOf(n))}</span>
-        ${role === "axiom" ? '<span class="text-[9px] px-1 rounded-sm bg-orange-100 text-orange-800 dark:bg-orange-950 dark:text-orange-200 shrink-0">公理</span>' : ""}
-        ${sh ? `<span class="text-[9px] shrink-0" style="color:${col}">${sh.ja}</span>` : ""}
-        ${nd.usesSorry ? '<span class="text-[9px] text-rose-600 shrink-0">sorry</span>' : ""}
+        <span class="font-mono text-xs truncate flex-1">${esc(shortOf(n))}</span>
+        ${role === "axiom" ? '<span class="text-xs px-1 rounded-sm bg-orange-100 text-orange-800 dark:bg-orange-950 dark:text-orange-200 shrink-0">公理</span>' : ""}
+        ${sh ? `<span class="text-xs shrink-0" style="color:${col}">${sh.ja}</span>` : ""}
+        ${nd.usesSorry ? '<span class="text-xs text-rose-600 shrink-0">sorry</span>' : ""}
       </div>
-      ${concl ? `<div class="font-mono text-[9.5px] text-stone-500 dark:text-stone-400 leading-snug break-words"
+      ${concl ? `<div class="font-mono text-xs text-stone-500 dark:text-stone-400 leading-snug break-words"
         >${esc(concl)}</div>` : ""}
     </button>`;
   }
@@ -1041,7 +1041,7 @@
     value: { t: "証", title: "証明（値）にだけ現れる。親をどう示したかを決める" },
   };
   const viaTag = (via) => VIA[via]
-    ? `<span class="shrink-0 text-[8.5px] px-1 rounded-sm bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400"
+    ? `<span class="shrink-0 text-xs px-1 rounded-sm bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400"
          title="${esc(VIA[via].title)}">${VIA[via].t}</span>` : "";
 
   /* ---- 判断（sequent）の表示 ----
@@ -1089,15 +1089,15 @@
        開いているときは判断を出さない（入れ子の図の横線の下に同じ判断が出る。重複していた）。 */
     const toggle = canOpen
       ? `<button data-deriv="${esc(name)}" title="${open ? "この前提の導出を閉じる" : "この前提の導出を開く"}"
-           class="text-[10px] text-stone-400 hover:text-stone-700 text-center">${open ? "▾" : "▸"}</button>`
-      : `<span class="text-[9px] text-stone-300 dark:text-stone-600 text-center">·</span>`;
+           class="text-xs text-stone-400 hover:text-stone-700 text-center">${open ? "▾" : "▸"}</button>`
+      : `<span class="text-xs text-stone-300 dark:text-stone-600 text-center">·</span>`;
     const head = `<div class="nm" ${canOpen ? `data-deriv="${esc(name)}"` : ""} title="${esc(name)}${canOpen ? "（押すと導出を開閉）" : ""}">
-        ${role === "axiom" ? `<span class="shrink-0 text-[10px] leading-none" style="color:${col}" title="公理（これ以上遡れない仮定）">★</span>` : dot(nd.kind, 6)}
-        <span class="t font-mono text-[11px] truncate min-w-0">${esc(shortOf(name))}</span>
-        ${sh ? `<span class="shrink-0 text-[9px]" style="color:${col}" title="${esc(sh.note)}">${sh.ja}</span>` : ""}
+        ${role === "axiom" ? `<span class="shrink-0 text-xs leading-none" style="color:${col}" title="公理（これ以上遡れない仮定）">★</span>` : dot(nd.kind, 6)}
+        <span class="t font-mono text-xs truncate min-w-0">${esc(shortOf(name))}</span>
+        ${sh ? `<span class="shrink-0 text-xs" style="color:${col}" title="${esc(sh.note)}">${sh.ja}</span>` : ""}
         ${viaTag(via)}
         ${pkgChip(nd)}
-        ${nd.usesSorry ? '<span class="shrink-0 text-[9px] text-rose-600">sorry</span>' : ""}
+        ${nd.usesSorry ? '<span class="shrink-0 text-xs text-rose-600">sorry</span>' : ""}
       </div>
       <button class="go" data-sel="${esc(name)}" title="この宣言を右パネルで見る（グラフでも選択。‹ で戻れる）">↗</button>`;
     const sub = !(open && canOpen) ? `<div class="cl">${sequentHtml(nd, true)}${premiseMeta(name, nd, met)}</div>` : "";
@@ -1137,7 +1137,7 @@
     if (parts.unknown && parts.unknown.length && premises.length) foot.push(`<span class="text-stone-400" title="${esc(parts.unknown.map((v) => v.name).join(", "))}（レポートの範囲外で種別が分からない）">範囲外 ${parts.unknown.length}</span>`);
     if (parts.frame.length) foot.push(`<span class="text-stone-400" title="${esc(parts.frame.map((v) => v.name).join(", "))}">骨組み ${parts.frame.length}</span>`);
     if (parts.part && parts.part.length) foot.push(`<span class="text-stone-400" title="${esc(parts.part.map((v) => v.name).join(", "))}（証明・本体の切り出し。中身は前提として上に展開済み）">断片 ${parts.part.length}</span>`);
-    const footHtml = foot.length ? `<div class="mt-1.5 text-[9px] leading-relaxed" style="word-spacing:2px">${foot.join(" · ")}</div>` : "";
+    const footHtml = foot.length ? `<div class="mt-1.5 text-xs leading-relaxed" style="word-spacing:2px">${foot.join(" · ")}</div>` : "";
     // 横線の下は判断  仮定 ⊢ 結論（前提の行と同じ読み方）
     const concl = `<div class="fig-concl">${sequentHtml(nd, !!withArgs)}</div>`;
 
@@ -1158,7 +1158,7 @@
         : "前提なし — 論理の骨組みだけで閉じている";
       return `<div>
         ${concl}
-        <div class="mt-1 text-[9.5px] text-stone-400">${why}</div>
+        <div class="mt-1 text-xs text-stone-400">${why}</div>
         ${footHtml}
       </div>`;
     }
@@ -1181,29 +1181,29 @@
     const nd = st.nodes[name];
     const h = st.previewHist, pos = st.previewPos;
     const chips = h.map((x, i) => `<button data-preview="${esc(x)}" title="${esc(x)}${i === pos ? "（いま見ている）" : "（押すとこの宣言を見て、グラフで選択）"}"
-        class="font-mono text-[10px] px-1.5 py-0.5 rounded-md shrink-0 border ${i === pos
+        class="font-mono text-xs px-1.5 py-0.5 rounded-md shrink-0 border ${i === pos
           ? "bg-indigo-600 text-white border-indigo-600"
           : "bg-white text-stone-600 border-stone-300 hover:bg-stone-100 dark:bg-stone-900 dark:text-stone-300 dark:border-stone-600"}"
         >${esc(shortOf(x))}</button>`).join("");
     const modeBtn = (v, l, t) => `<button data-follow="${v}" title="${esc(t)}"
-        class="px-2 py-0.5 text-[10.5px] rounded-sm ${(!!st.previewFollow) === (v === "1")
+        class="px-2 py-0.5 text-xs rounded-sm ${(!!st.previewFollow) === (v === "1")
           ? "bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900"
           : "text-stone-500 hover:bg-stone-100 dark:hover:bg-stone-800"}">${l}</button>`;
     const navBtn = (attr, glyph, on, t) => `<button ${attr} ${on ? "" : "disabled"} title="${esc(t)}"
-        class="w-6 h-6 rounded-md text-[13px] ${on ? "text-stone-700 hover:bg-stone-100 dark:text-stone-200 dark:hover:bg-stone-800" : "text-stone-300 dark:text-stone-700"}">${glyph}</button>`;
+        class="w-6 h-6 rounded-md text-sm ${on ? "text-stone-700 hover:bg-stone-100 dark:text-stone-200 dark:hover:bg-stone-800" : "text-stone-300 dark:text-stone-700"}">${glyph}</button>`;
     const isCenter = name === dv.center;
     const role = isCenter
-      ? `<span class="text-[10px] px-1.5 py-0.5 rounded-sm bg-indigo-600 text-white shrink-0" title="グラフの中心と同じ宣言">中心</span>`
-      : `<span class="text-[10px] px-1.5 py-0.5 rounded-sm bg-stone-700 text-white dark:bg-stone-200 dark:text-stone-900 shrink-0" title="選択中の宣言（グラフの中心とは別。経路が光る）">選択</span>`;
+      ? `<span class="text-xs px-1.5 py-0.5 rounded-sm bg-indigo-600 text-white shrink-0" title="グラフの中心と同じ宣言">中心</span>`
+      : `<span class="text-xs px-1.5 py-0.5 rounded-sm bg-stone-700 text-white dark:bg-stone-200 dark:text-stone-900 shrink-0" title="選択中の宣言（グラフの中心とは別。経路が光る）">選択</span>`;
     return `
       <div class="flex items-center gap-1 px-1 pb-1">
-        <span class="text-[10px] text-stone-400 shrink-0">見ている宣言</span>
+        <span class="text-xs text-stone-400 shrink-0">見ている宣言</span>
         <div class="flex gap-0.5 p-0.5 rounded-md bg-stone-200/70 dark:bg-stone-800 shrink-0">
           ${modeBtn("0", "中心固定", "グラフの中心を出し続ける")}${modeBtn("1", "追従", "一覧やグラフで選んだ宣言を出す（中心は動かない）")}
         </div>
         <span class="flex-1"></span>
         ${navBtn("data-pback", "‹", pos > 0, "前に見た宣言へ（[ キー）")}
-        <span class="text-[9.5px] text-stone-400 tabular-nums">${h.length ? `${pos + 1}/${h.length}` : ""}</span>
+        <span class="text-xs text-stone-400 tabular-nums">${h.length ? `${pos + 1}/${h.length}` : ""}</span>
         ${navBtn("data-pfwd", "›", pos < h.length - 1, "次に見た宣言へ（] キー）")}
       </div>
       ${chips ? `<div class="flex gap-1 px-1 pb-1.5 overflow-x-auto" style="scrollbar-width:thin" title="見た順。押すとその宣言を見て、グラフで選択する">${chips}</div>` : ""}
@@ -1211,11 +1211,11 @@
         <div class="flex items-center gap-1.5" style="min-height:22px">
           ${role}
           ${dot(nd.kind, 7)}
-          <span class="text-[10px] px-1.5 py-0.5 rounded-sm bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300">${kinfo(nd.kind).ja}</span>
+          <span class="text-xs px-1.5 py-0.5 rounded-sm bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300">${kinfo(nd.kind).ja}</span>
           <span class="flex-1"></span>
-          ${isCenter ? "" : `<button data-nav="${esc(name)}" class="text-[10px] px-1.5 py-0.5 rounded-sm bg-indigo-600 text-white hover:bg-indigo-500 shrink-0">中心にする</button>`}
+          ${isCenter ? "" : `<button data-nav="${esc(name)}" class="text-xs px-1.5 py-0.5 rounded-sm bg-indigo-600 text-white hover:bg-indigo-500 shrink-0">中心にする</button>`}
         </div>
-        <div class="font-mono text-[12px] font-medium leading-snug mt-0.5" style="overflow-wrap:anywhere">${esc(name)}</div>
+        <div class="font-mono text-xs font-medium leading-snug mt-0.5" style="overflow-wrap:anywhere">${esc(name)}</div>
       </div>` : ""}`;
   }
 
@@ -1239,7 +1239,7 @@
     const open = keepOpen(body);
     const header = subjectHeader(st, dv, name);
 
-    if (!nd) { body.innerHTML = header + `<p class="px-2 py-4 text-center text-[12px] text-stone-400">対象がありません</p>`; return; }
+    if (!nd) { body.innerHTML = header + `<p class="px-2 py-4 text-center text-xs text-stone-400">対象がありません</p>`; return; }
     const seen = new Set([name]);
     const parts = LDR.roles.split(name, st.nodes);
     const nPrem = parts.axiom.length + parts.lemma.length;
@@ -1253,25 +1253,25 @@
           <summary title="${esc(where)}"><span>原文</span><span class="grow font-mono text-stone-400">${esc(shortOf(nd.module))}${nd.line ? ":" + nd.line : ""}</span><span class="text-stone-400">${srcLines} 行</span></summary>
           <div class="src">${sourceHtml(nd.source, nd.line || 1)}</div>
         </details>`
-      : `<div class="text-[10px] text-stone-400">原文なし（古い形式のレポートか、ソースが検索パスに無い）</div>`;
+      : `<div class="text-xs text-stone-400">原文なし（古い形式のレポートか、ソースが検索パスに無い）</div>`;
     /* 区画の順: 所在と文書 → 原文 → シグネチャ → 説明 → 印 → 公理 → 数値 → 依存パッケージ → 導出図 → 型 → 証明項。
        隙間は .pv の space-y で一定（6px）。由来は印の中の一つ（「X の派生: 単射性」）にだけ出す
        （数値の行にも「成員: LE」と重ねて出していた。実測）。 */
     body.innerHTML = header + `
       <div class="pv px-1 pt-2">
         <div class="row">
-          <span class="font-mono text-[10px] text-stone-500 min-w-0 truncate" style="flex:1 1 auto" title="${esc(where)}">${esc(where)}</span>
+          <span class="font-mono text-xs text-stone-500 min-w-0 truncate" style="flex:1 1 auto" title="${esc(where)}">${esc(where)}</span>
           ${pkgChip(nd)}
           <span class="flex items-center gap-2" style="flex:none;white-space:nowrap">${docLinks(nd, name)}</span>
         </div>
         ${sourceBlock}
         <div class="sec">
-          ${signatureBlock(nd) || `<div class="px-2 py-1 text-[11px] text-stone-400">シグネチャ情報なし</div>`}
+          ${signatureBlock(nd) || `<div class="px-2 py-1 text-xs text-stone-400">シグネチャ情報なし</div>`}
         </div>
-        ${nd.docString ? `<div class="text-[11px] text-stone-600 dark:text-stone-400 leading-relaxed space-y-1 px-0.5">${docHtml(nd.docString)}</div>` : ""}
+        ${nd.docString ? `<div class="text-xs text-stone-600 dark:text-stone-400 leading-relaxed space-y-1 px-0.5">${docHtml(nd.docString)}</div>` : ""}
         <div class="row"><span class="lbl">印</span>${markChips(name, nd, dv, true)}</div>
         <div class="row"><span class="lbl">公理</span>${axiomChips(nd, st, true)}</div>
-        <div class="row text-[10px] text-stone-500">
+        <div class="row text-xs text-stone-500">
           <span class="lbl">数値</span>
           <span class="tag" title="主張（型）の節点数">型 ${nd.typeSize || 0}</span><span class="tag" title="証明項・本体の節点数">証明 ${nd.valueSize || 0}</span>
           ${nd.subject ? `<span class="tag font-mono" title="主題（何についての宣言か）: ${esc(nd.subject)}">主題 ${esc(shortOf(nd.subject))}</span>` : ""}
@@ -1287,10 +1287,10 @@
         </details>
         ${nd.typeString ? `<details data-keep="type" class="sec"${open("type")}>
           <summary title="Lean が整形して表示する型（∀ の連鎖・完全修飾名）。原文ではない"><span>型（Lean の表示）</span></summary>
-          <pre class="font-mono text-[10px] leading-relaxed whitespace-pre-wrap break-words
+          <pre class="font-mono text-xs leading-relaxed whitespace-pre-wrap break-words
             border-t border-stone-200 dark:border-stone-700 px-2 py-1 max-h-48 overflow-y-auto">${esc(nd.typeString)}</pre></details>` : ""}
         ${nd.valueString ? `<details data-keep="value" class="sec"${open("value")}><summary><span>証明項</span></summary>
-          <pre class="font-mono text-[10px] whitespace-pre-wrap break-words leading-snug
+          <pre class="font-mono text-xs whitespace-pre-wrap break-words leading-snug
             border-t border-stone-200 dark:border-stone-700 px-2 py-1 max-h-48 overflow-y-auto">${esc(nd.valueString)}</pre></details>` : ""}
       </div>`;
   }
@@ -1324,17 +1324,17 @@
     const inv = S.lawInventory();
     const laws = inv.LAWS;
     if (!inv.list.length) {
-      body.innerHTML = `<p class="px-2 py-6 text-center text-[12px] text-stone-400">
+      body.innerHTML = `<p class="px-2 py-6 text-center text-xs text-stone-400">
         判定できた法則がありません（古い形式のレポートか、該当する形の定理がありません）</p>`;
       return;
     }
     const head = `<div class="grid gap-px sticky top-0 bg-white dark:bg-stone-900 z-10"
         style="grid-template-columns: minmax(96px,1fr) repeat(${laws.length}, 22px) 62px">
-      <div class="text-[9.5px] text-stone-400 pb-1">関係・演算</div>
-      ${laws.map((l) => `<div class="text-[9px] text-center pb-1 leading-none"
+      <div class="text-xs text-stone-400 pb-1">関係・演算</div>
+      ${laws.map((l) => `<div class="text-xs text-center pb-1 leading-none"
           style="writing-mode:vertical-rl;height:38px;color:hsl(${LAW_HUE[l]},45%,45%)"
           title="${esc(LAW_JA[l])}">${esc(LAW_JA[l])}</div>`).join("")}
-      <div class="text-[9.5px] text-stone-400 pb-1 text-right">判断</div>
+      <div class="text-xs text-stone-400 pb-1 text-right">判断</div>
     </div>`;
 
     const rows = inv.list.map((r) => {
@@ -1345,36 +1345,36 @@
       const cells = laws.map((l) => {
         const list = r.laws[l] || [];
         if (!list.length) {
-          return `<div class="h-5 flex items-center justify-center text-[9px] text-stone-300 dark:text-stone-700">·</div>`;
+          return `<div class="h-5 flex items-center justify-center text-xs text-stone-300 dark:text-stone-700">·</div>`;
         }
         // 二演算法則(吸収・分配)は相方が、単調はその関係が意味の半分を担う。tooltip に対を明示する
         const partners = r.pairs && r.pairs[l]
           ? ` — ${l === "mono" ? "関係" : "相方"} ${[...r.pairs[l]].map(shortOf).join(", ")}` : "";
         return `<button data-sel="${esc(list[0])}" title="${esc(LAW_JA[l])}${esc(partners)}: ${esc(list[0])}${list.length > 1 ? ` 他 ${list.length - 1} 件` : ""}"
-          class="h-5 w-full rounded-[3px] text-[9px] font-medium text-white flex items-center justify-center hover:brightness-110"
+          class="h-5 w-full rounded-[3px] text-xs font-medium text-white flex items-center justify-center hover:brightness-110"
           style="background:hsl(${LAW_HUE[l]},58%,48%)">${list.length > 1 ? list.length : ""}</button>`;
       }).join("");
       return `<div class="grid gap-px items-center hover:bg-stone-50 dark:hover:bg-stone-800/50 rounded-sm"
           style="grid-template-columns: minmax(96px,1fr) repeat(${laws.length}, 22px) 62px">
         <button data-sel="${esc(r.rel)}" title="${esc(r.rel)}${r.type ? " の " + esc(r.type) + " 上の法則" : "（担い手の型は多相）"}"
-          class="text-left font-mono text-[10px] truncate pr-1 hover:underline">${esc(shortOf(r.rel))}${
+          class="text-left font-mono text-xs truncate pr-1 hover:underline">${esc(shortOf(r.rel))}${
             r.type ? `<span class="text-stone-400"> @ ${esc(shortOf(r.type))}</span>` : ""}</button>
         ${cells}
         <div class="text-right pl-1">${verdict
-          ? `<span class="text-[9px] px-1 py-0.5 rounded-sm font-medium"
+          ? `<span class="text-xs px-1 py-0.5 rounded-sm font-medium"
                style="background:hsl(${verdict.h},70%,92%);color:hsl(${verdict.h},60%,30%)">${verdict.t}</span>`
-          : `<span class="text-[9px] text-stone-300 dark:text-stone-700">—</span>`}</div>
+          : `<span class="text-xs text-stone-300 dark:text-stone-700">—</span>`}</div>
       </div>`;
     }).join("");
 
     const proved = inv.list.reduce((a, r) => a + r.total, 0);
     body.innerHTML = `
-      <div class="px-1 pb-1.5 text-[10px] text-stone-500 dark:text-stone-400 leading-relaxed">
+      <div class="px-1 pb-1.5 text-xs text-stone-500 dark:text-stone-400 leading-relaxed">
         ${inv.list.length} 個の関係・演算（担い手の型ごと）について ${proved} 件の法則を検出。
         対象の宣言が証明したものだけを数え、押すとその定理を選びます。
       </div>
       <div class="px-1 overflow-x-auto">${head}<div class="space-y-px">${rows}</div></div>
-      <p class="px-1 pt-2 text-[9.5px] text-stone-400 leading-relaxed">
+      <p class="px-1 pt-2 text-xs text-stone-400 leading-relaxed">
         空欄は「まだ証明されていない」であって「成り立たない」ではありません。
         判定は仮定と結論の構文的な形から行い、誤って付けない向きに倒してあるので、
         別の言い回しで証明されているものは取り逃します。
@@ -1397,7 +1397,7 @@
       const tabs = $("depTabs"), body = $("depBody");
       if (!nd) {
         tabs.innerHTML = "";
-        body.innerHTML = subjectHeader(st, dv, name) + `<p class="px-2 py-4 text-center text-[12px] text-stone-400">対象がありません</p>`;
+        body.innerHTML = subjectHeader(st, dv, name) + `<p class="px-2 py-4 text-center text-xs text-stone-400">対象がありません</p>`;
         return;
       }
       const idx = dv.declIdx;
@@ -1416,7 +1416,7 @@
       };
       // 六つの札が既定の幅（330px）で一行に収まる大きさ（二段に割れていた。実測）
       const mk = (id, label, title) => `<button data-tab="${id}" title="${esc(title || "")}"
-        class="px-1 py-0.5 text-[10px] rounded-md whitespace-nowrap ${cur === id
+        class="px-1 py-0.5 text-xs rounded-md whitespace-nowrap ${cur === id
           ? "bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900"
           : "text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800"}">${label}</button>`;
       tabs.innerHTML = mk("prev", "プレビュー", "見ている宣言の原文・シグネチャ・導出図") + mk("laws", "法則", "法則の在庫表（関係 × 法則）")
@@ -1430,10 +1430,10 @@
       const sorted = sel.list.slice().sort((a, b) =>
         ((met.closure[a] || 0) - (met.closure[b] || 0)) || (a < b ? -1 : 1));
       body.innerHTML = subjectHeader(st, dv, name)
-        + `<p class="px-2 pb-1.5 pt-1.5 text-[11px] text-stone-500 dark:text-stone-400 leading-relaxed">${sel.note}</p>`
+        + `<p class="px-2 pb-1.5 pt-1.5 text-xs text-stone-500 dark:text-stone-400 leading-relaxed">${sel.note}</p>`
         + (sorted.length
           ? `<div class="space-y-0.5">${sorted.map((n) => depRow(n, st)).join("")}</div>`
-          : `<p class="px-2 py-4 text-center text-[12px] text-stone-400">なし</p>`);
+          : `<p class="px-2 py-4 text-center text-xs text-stone-400">なし</p>`);
     });
   }
 
@@ -1443,7 +1443,7 @@
     once("hist", h.seq + "|" + h.curId + "|" + h.order.length, () => {
       const el = $("histBody");
       if (!h.order.length) {
-        el.innerHTML = `<p class="px-2 py-3 text-[12px] text-stone-400 text-center">まだ移動していません</p>`;
+        el.innerHTML = `<p class="px-2 py-3 text-xs text-stone-400 text-center">まだ移動していません</p>`;
         $("histCount").textContent = "";
         return;
       }
@@ -1461,8 +1461,8 @@
                  ${isCur ? "bg-indigo-600 text-white"
                          : onPath ? "bg-indigo-50 dark:bg-indigo-950/50 text-indigo-900 dark:text-indigo-200"
                                   : "hover:bg-stone-100 dark:hover:bg-stone-800"}">
-          <span class="text-[9.5px] ${isCur ? "text-indigo-200" : "text-stone-400"}">${depth ? "└" : "•"}</span>
-          <span class="font-mono text-[11px] truncate flex-1">${esc(shortOf(nd.name))}</span>
+          <span class="text-xs ${isCur ? "text-indigo-200" : "text-stone-400"}">${depth ? "└" : "•"}</span>
+          <span class="font-mono text-xs truncate flex-1">${esc(shortOf(nd.name))}</span>
         </button>`);
         for (const ch of nd.children) walk(ch, depth + 1);
       };
@@ -1477,7 +1477,7 @@
     once("pins", st.pins.map((p) => p.id).join(",") , () => {
       const el = $("pinBody");
       if (!st.pins.length) {
-        el.innerHTML = `<p class="px-2 py-3 text-[12px] text-stone-400 text-center">閲覧状態を保存できます</p>`;
+        el.innerHTML = `<p class="px-2 py-3 text-xs text-stone-400 text-center">閲覧状態を保存できます</p>`;
         $("pinCount").textContent = "";
         return;
       }
@@ -1489,8 +1489,8 @@
         return `<div class="flex items-center gap-1 group">
           <button data-pin="${esc(p.id)}" title="${esc(p.snap.center || "")}"
             class="flex-1 min-w-0 text-left px-2 py-1 rounded-sm hover:bg-stone-100 dark:hover:bg-stone-800">
-            <span class="font-mono text-[11px] truncate block">${esc(shortOf(p.label || ""))}</span>
-            <span class="text-[9.5px] text-stone-400">${t} · 深さ${esc(p.snap.baseDepth ?? 1)} · 下錐${{ all: "両方", type: "主張", value: "呼出" }[p.snap.refFilter] || "両方"}${exp ? ` · 展開${exp}` : ""}</span>
+            <span class="font-mono text-xs truncate block">${esc(shortOf(p.label || ""))}</span>
+            <span class="text-xs text-stone-400">${t} · 深さ${esc(p.snap.baseDepth ?? 1)} · 下錐${{ all: "両方", type: "主張", value: "呼出" }[p.snap.refFilter] || "両方"}${exp ? ` · 展開${exp}` : ""}</span>
           </button>
           <button data-unpin="${esc(p.id)}" title="削除"
             class="w-6 h-6 shrink-0 rounded-sm text-stone-400 opacity-0 group-hover:opacity-100 hover:bg-stone-200 dark:hover:bg-stone-700">✕</button>
@@ -1538,7 +1538,7 @@
       };
       $("minCount").textContent = count[mode];
       if ($("minMode")) $("minMode").innerHTML = Object.keys(MODE).map((m) => `<button data-minmode="${m}" title="${esc(MODE[m].t)}"
-          class="px-2 py-0.5 text-[11px] rounded-md ${mode === m
+          class="px-2 py-0.5 text-xs rounded-md ${mode === m
             ? "bg-white dark:bg-stone-700 shadow-sm text-stone-900 dark:text-stone-100"
             : "text-stone-500 hover:text-stone-800 dark:hover:text-stone-200"}">${MODE[m].l}</button>`).join("");
       /* 公理チップ等から経路表示を求めたが、読み込んだ範囲に中心からの経路が無い。
@@ -1546,7 +1546,7 @@
          持たないので、両者の食い違いは起こり得る。黙って全てを暗くせず、ここで伝える。
          この区画は既定で畳まれている（見出しの公理チップから求めた場合は見えない）ので、開く。 */
       const unreachable = dv.traceUnreachable
-        ? `<div class="mb-1 text-[10.5px] px-2 py-1 rounded-sm bg-amber-50 text-amber-900 dark:bg-amber-950/60 dark:text-amber-200">
+        ? `<div class="mb-1 text-xs px-2 py-1 rounded-sm bg-amber-50 text-amber-900 dark:bg-amber-950/60 dark:text-amber-200">
              <span class="font-mono">${esc(shortOf(dv.traceUnreachable))}</span> への経路は読み込んだ範囲にありません
              （公理は証明項の末端まで辿った結果で、依存グラフは対象の外を一段しか持たないため）。
              <button data-trace="${esc(dv.traceUnreachable)}" class="underline">解除</button>
@@ -1558,24 +1558,24 @@
         const shown = n in vis;
         const ax = (st.nodes[n] || {}).kind === "axiom";
         return `<button data-trace="${esc(n)}" title="${esc(title || n)}"
-          class="font-mono text-[10.5px] px-2 py-0.5 rounded-full transition
+          class="font-mono text-xs px-2 py-0.5 rounded-full transition
                  ${ax ? "bg-orange-100 text-orange-900 dark:bg-orange-950/70 dark:text-orange-200" : "bg-amber-100 text-amber-900 dark:bg-amber-950/70 dark:text-amber-200"}
                  ${dim ? "ring-1 ring-dashed ring-amber-300 dark:ring-amber-800 bg-transparent" : ""}
                  ${on ? "ring-2 ring-amber-500" : "hover:ring-1 hover:ring-amber-400"}
-                 ${shown ? "" : "opacity-60"}">${esc(shortOf(n))}${extra ? `<span class="text-[9px] text-amber-700/70 dark:text-amber-300/70"> ${extra}</span>` : ""}</button>`;
+                 ${shown ? "" : "opacity-60"}">${esc(shortOf(n))}${extra ? `<span class="text-xs text-amber-700/70 dark:text-amber-300/70"> ${extra}</span>` : ""}</button>`;
       };
       /* 経路表示中は、順序区間の大きさと、描いている測地区間（最短路の合併）の大きさを示す。
          区間の全節点を描くと図が爆発するので、描くのは最短路上の節点だけ（残りは +n で開ける） */
       const geo = dv.traceGeodesic, hl = dv.highlight;
       const traceInfo = st.traceTarget && hl && hl.size
-        ? `<span class="text-[10.5px] text-amber-800 dark:text-amber-300" title="順序区間 [t, c] = ↑t ∩ ↓c の節点数と、そのうち描いている最短路上（測地区間: δ(c,x)+δ(x,t)=δ(c,t)）の節点数。区間の外は暗く、最短路の外の子は +n で開ける">
+        ? `<span class="text-xs text-amber-800 dark:text-amber-300" title="順序区間 [t, c] = ↑t ∩ ↓c の節点数と、そのうち描いている最短路上（測地区間: δ(c,x)+δ(x,t)=δ(c,t)）の節点数。区間の外は暗く、最短路の外の子は +n で開ける">
              区間 ${hl.size} 件のうち最短路上の ${geo ? geo.size : 0} 件を描く</span>` : "";
       const head = `
         <div class="flex items-baseline gap-2 flex-wrap mb-1">
-          <span class="text-[10.5px] text-stone-500">${esc(MODE[mode].t)}。押すとそこへ至る経路だけを表示</span>
+          <span class="text-xs text-stone-500">${esc(MODE[mode].t)}。押すとそこへ至る経路だけを表示</span>
           ${traceInfo}
           ${st.traceTarget ? `<button data-trace="${esc(st.traceTarget)}"
-            class="text-[10.5px] px-1.5 py-0.5 rounded-sm bg-amber-500 text-white">経路表示を解除</button>` : ""}
+            class="text-xs px-1.5 py-0.5 rounded-sm bg-amber-500 text-white">経路表示を解除</button>` : ""}
         </div>`;
       let body = "";
       if (mode === "atoms") {
@@ -1584,21 +1584,21 @@
         const cen = st.nodes[dv.center] || {};
         const axs = (cen.axioms || []).filter((a) => st.nodes[a]);
         const list = tm.slice().sort();
-        body = (axs.length ? `<div class="flex items-start gap-2 mb-1"><span class="text-[10px] text-stone-500 shrink-0 min-w-[5.5em] whitespace-nowrap pt-0.5" title="これ以上遡れない仮定。型が Eq・Iff を参照するので依存順序の原子ではない">公理 ${axs.length}</span>
+        body = (axs.length ? `<div class="flex items-start gap-2 mb-1"><span class="text-xs text-stone-500 shrink-0 min-w-[5.5em] whitespace-nowrap pt-0.5" title="これ以上遡れない仮定。型が Eq・Iff を参照するので依存順序の原子ではない">公理 ${axs.length}</span>
             <div class="flex flex-wrap gap-1 min-w-0">${axs.map((a) => chip(a, `${a}（公理）`)).join("")}</div></div>` : "")
-          + `<div class="flex items-start gap-2"><span class="text-[10px] text-stone-500 shrink-0 min-w-[5.5em] whitespace-nowrap pt-0.5" title="依存先を持たない宣言（語彙の原子）。読み込んだ範囲の中で見つかったもの。境界の先にも原子はあり得る">原子 ${list.length}</span>
+          + `<div class="flex items-start gap-2"><span class="text-xs text-stone-500 shrink-0 min-w-[5.5em] whitespace-nowrap pt-0.5" title="依存先を持たない宣言（語彙の原子）。読み込んだ範囲の中で見つかったもの。境界の先にも原子はあり得る">原子 ${list.length}</span>
             <div class="flex flex-wrap gap-1 min-w-0">${list.length
               ? list.map((n) => chip(n, `${n}（${kinfo((st.nodes[n] || {}).kind).ja}）`)).join("")
-              : '<span class="text-[12px] text-stone-400">依存先がありません（この宣言自身が原始的）</span>'}</div></div>`;
+              : '<span class="text-xs text-stone-400">依存先がありません（この宣言自身が原始的）</span>'}</div></div>`;
       } else if (mode === "frontier") {
         const memberLine = memberCount
-          ? `<div class="text-[10px] text-stone-500 mb-1" title="${esc([...fc.members.entries()].map(([o, ls]) => `${o}: ${ls.join(", ")}`).join("\n"))}">既知の構造体の成員（射影・構成子）${memberCount} 件は構造体に畳む: ${esc([...fc.members.keys()].map(shortOf).join(", "))}</div>` : "";
+          ? `<div class="text-xs text-stone-500 mb-1" title="${esc([...fc.members.entries()].map(([o, ls]) => `${o}: ${ls.join(", ")}`).join("\n"))}">既知の構造体の成員（射影・構成子）${memberCount} 件は構造体に畳む: ${esc([...fc.members.keys()].map(shortOf).join(", "))}</div>` : "";
         body = memberLine + `<div class="flex flex-wrap gap-1">${fc.rest.length
           ? fc.rest.map((n) => chip(n)).join("")
-          : '<span class="text-[12px] text-stone-400">範囲外へ続く依存はありません（閉包が読み込んだ範囲で閉じている）</span>'}</div>`;
+          : '<span class="text-xs text-stone-400">範囲外へ続く依存はありません（閉包が読み込んだ範囲で閉じている）</span>'}</div>`;
       } else {
         if (!fd) {
-          body = '<span class="text-[12px] text-stone-400">基盤は宣言粒度でだけ計算します</span>';
+          body = '<span class="text-xs text-stone-400">基盤は宣言粒度でだけ計算します</span>';
         } else {
           const R = LDR.roles;
           const groups = new Map();
@@ -1612,11 +1612,11 @@
               `${e.name}（${R.GROUP[g].ja}）\n使う対象側の宣言 ${e.users.length} 件: ${e.users.slice(0, 8).map(shortOf).join(", ")}${e.users.length > 8 ? " …" : ""}\n${e.inStatement ? "主張（型依存の閉包）が立脚する" : "証明が持ち込んだ（主張には現れない）"}`,
               e.users.length > 1 ? `×${e.users.length}` : "", !e.inStatement)).join("");
             return `<div class="flex items-start gap-2 mb-1">
-              <span class="text-[10px] text-stone-500 shrink-0 min-w-[5.5em] whitespace-nowrap pt-0.5" title="${esc(R.GROUP[g].note)}">${esc(R.GROUP[g].ja)} ${es.length}</span>
+              <span class="text-xs text-stone-500 shrink-0 min-w-[5.5em] whitespace-nowrap pt-0.5" title="${esc(R.GROUP[g].note)}">${esc(R.GROUP[g].ja)} ${es.length}</span>
               <div class="flex flex-wrap gap-1 min-w-0">${chips}</div></div>`;
           });
-          body = sections.join("") || '<span class="text-[12px] text-stone-400">対象の閉包は外へ出ません（対象の中で閉じている）</span>';
-          body += `<div class="text-[9.5px] text-stone-400 mt-1">実線の札は主張が立脚するもの、破線の札は証明が持ち込んだもの。×k は使う対象側の宣言の数</div>`;
+          body = sections.join("") || '<span class="text-xs text-stone-400">対象の閉包は外へ出ません（対象の中で閉じている）</span>';
+          body += `<div class="text-xs text-stone-400 mt-1">実線の札は主張が立脚するもの、破線の札は証明が持ち込んだもの。×k は使う対象側の宣言の数</div>`;
         }
       }
       el.innerHTML = unreachable + head + body;
@@ -1638,7 +1638,7 @@
       Object.keys(st.nodes).length, dv.center].join("|"), () => {
       // 区切りボタンの内側では折り返さない（「モジュ／ール」と割れた。実測）
       const seg = (id, cur2, opts) => opts.map((o) => `<button data-${id}="${o.v}" title="${esc(o.t || "")}"
-        class="px-1.5 py-0.5 text-[11.5px] rounded-md whitespace-nowrap ${cur2 === o.v
+        class="px-1.5 py-0.5 text-xs rounded-md whitespace-nowrap ${cur2 === o.v
           ? "bg-white dark:bg-stone-700 shadow-sm text-stone-900 dark:text-stone-100"
           : "text-stone-500 hover:text-stone-800 dark:hover:text-stone-200"}">${o.l}</button>`).join("");
       $("segEdge").innerHTML = seg("edge", st.edgeMode, [{ v: "all", l: "型+値" }, { v: "type", l: "型のみ" }]);
@@ -1654,7 +1654,7 @@
         { v: "kind", l: "種別", t: "定理・定義・帰納型などの種別で束ねる" },
         { v: "none", l: "なし" }]);
       $("segDensity").innerHTML = [24, 36, 48, 72].map((d) => `<button data-density="${d}"
-        class="px-1.5 py-0.5 text-[10.5px] rounded-sm ${st.density === d
+        class="px-1.5 py-0.5 text-xs rounded-sm ${st.density === d
           ? "bg-white dark:bg-stone-700 shadow-sm text-stone-900 dark:text-stone-100"
           : "text-stone-500 hover:text-stone-800 dark:hover:text-stone-200"}">${d}</button>`).join("");
       // 下の参照錐に入れる辺。既定は「両方」で、呼び出し元も最初から下に開く。
@@ -1670,7 +1670,7 @@
         ["bg-stone-900", "text-white", "dark:bg-stone-100", "dark:text-stone-900", "border-stone-900"]);
       // 種別の絞り込みは左の絞り込みの札（renderFilters）に一本化した（「表示 ▾」との二重表示を解消）
 
-      $("crumb").innerHTML = `<span class="font-mono text-[12px] text-stone-500 truncate">${esc(dv.center || "")}</span>`;
+      $("crumb").innerHTML = `<span class="font-mono text-xs text-stone-500 truncate">${esc(dv.center || "")}</span>`;
     });
   }
 

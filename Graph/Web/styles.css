@@ -1,0 +1,10 @@
+@import "tailwindcss";
+@source "./index.html";
+@source "./index.js";
+@source "./js/*.js";
+@custom-variant dark (&:where(.dark, .dark *));
+@theme {
+  --font-sans: system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@layer base { button:not(:disabled) { cursor: pointer; } }
