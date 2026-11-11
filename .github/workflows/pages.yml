@@ -1,0 +1,137 @@
+# お題（cslib の Commitment / SecretSharing）の解析結果を表示するビューアを GitHub Pages に配置する。
+#
+# 手元で使ってきた一本のコマンドをそのまま回す（新しい段取りは持ち込まない）:
+#   make all TARGET=Debug/Examples MODULES="Cslib.Crypto.Protocols.Commitment Cslib.Crypto.Protocols.SecretSharing" ARGS="--import-all"
+# これ一本が init（衛星の生成・依存の解決）→ Mathlib のキャッシュ取得 → cslib の二モジュールだけの
+# lake build → 解析器のビルド → decl_report → ldr_check → web（Graph/report.jsonl・report.meta.json・
+# Web/js/default-report.js の生成）までを含む（Commands/Scripts/l4sb.sh）。フィクスチャ（Examples）の
+# ビルドや解析、js/sample.js の生成は配置物に関係ないので行わない。ldr_check に落ちたレポートは
+# make が非零で終わるので配置されない。
+#
+# CI 固有に足すもの:
+#   - elan / node / 空き容量の確保。
+#   - cslib にはビルド済み成果物の配信が無い（Mathlib の `lake exe cache` に相当するものは無く、
+#     Reservoir の表示も互換性だけ）。Mathlib は cache get で取り、cslib はここで一度ビルドして
+#     actions/cache に保存する。
+#   - キャッシュは run ごとの鍵で毎回保存し、復元は接頭辞で最新のものを取る。「同じ鍵なら保存を
+#     飛ばす」作りだと、初回が途中で落ちた時の部分保存（Mathlib だけ、cslib 未ビルド）が二度と
+#     更新されず、毎回 cslib を最初からビルドする（実測）。
+#   - ARGS に --fetch-cache を足す。復元したキャッシュが古い manifest のもの（restore-keys）でも、
+#     Mathlib をソースからビルドし始めない（取得済みなら「No files to download」で数秒）。
+#   - MODULES をジョブの環境変数に置かない（Makefile の `MODULES ?=` が拾う）。コマンド行でだけ渡す。
+#   - lake の並列数は指定しない（Lake 5.0.0 / v4.35.0 に並列数のオプションは無い。`-j` で止まった。実測）。
+name: pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "Graph/**"
+      - "Commands/**"
+      - "Debug/Examples/**"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 配置は一度に一つ。進行中のものは止めない（配置の途中で切ると Pages が中途半端になる）
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+env:
+  TARGET: Debug/Examples
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 170
+    steps:
+      - uses: actions/checkout@v4
+
+      # Mathlib の成果物は数 GB。既定の runner は空きが十分でないことがあるので、不要な SDK を外す
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/share/boost "$AGENT_TOOLSDIRECTORY" || true
+          df -h /
+          free -h
+          nproc
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install elan
+        run: |
+          curl -sSfL https://elan.lean-lang.org/elan-init.sh | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      # 鍵は対象の manifest と toolchain の hash に run の番号を足したもの（毎回新しい鍵で保存する）。
+      # 復元は接頭辞: 同じ manifest の最新 → 別の manifest の最新（その場合は --fetch-cache が Mathlib を
+      # 取り直す）。hashFiles は step の中でしか使えない（ジョブの env に置いて止まった。実測）。
+      # 解析器のソースは鍵に入れない（衛星の stamp がソースの変更を検出して再複写・再ビルドする）
+      - name: Restore Lean toolchain, packages and builds
+        id: restore
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            ~/.elan
+            ${{ env.TARGET }}/.lake
+            ${{ env.TARGET }}/.l4sb
+          key: l4sb-v2-${{ hashFiles('Debug/Examples/lake-manifest.json', 'Debug/Examples/lean-toolchain') }}-${{ github.run_id }}
+          restore-keys: |
+            l4sb-v2-${{ hashFiles('Debug/Examples/lake-manifest.json', 'Debug/Examples/lean-toolchain') }}
+            l4sb-v2-
+
+      - name: Lean toolchain of the target
+        run: |
+          cd "$TARGET"
+          lean --version
+          lake --version
+          df -h /
+
+      # 手元と同じ一本（cslib の二モジュールの解析。init → build → report → check → web）
+      - name: make all TARGET=Debug/Examples MODULES="Cslib.Crypto.Protocols.Commitment Cslib.Crypto.Protocols.SecretSharing" ARGS="--import-all"
+        run: |
+          make all TARGET="$TARGET" MODULES="Cslib.Crypto.Protocols.Commitment Cslib.Crypto.Protocols.SecretSharing" ARGS="--import-all --fetch-cache"
+          df -h /
+
+      - name: Assemble site
+        run: |
+          rm -rf site
+          mkdir -p site
+          cp -r Graph/Web/. site/
+          cp Graph/report.jsonl site/report.jsonl
+          cp Graph/report.meta.json site/report.meta.json
+          touch site/.nojekyll
+          ls -la site site/js
+          du -sh site
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      # 失敗しても途中成果（toolchain・packages・Mathlib の oleans・cslib のビルド）を残す。
+      # 鍵は run ごとなので必ず新しく保存される（古いものは GitHub 側の上限で順に消える）
+      - name: Save Lean toolchain, packages and builds
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            ~/.elan
+            ${{ env.TARGET }}/.lake
+            ${{ env.TARGET }}/.l4sb
+          key: l4sb-v2-${{ hashFiles('Debug/Examples/lake-manifest.json', 'Debug/Examples/lean-toolchain') }}-${{ github.run_id }}
+
+  deploy:
+    needs: analyze
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,26 @@
+{
+  "name": "lean4-marumie",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Lean project declaration reports and an offline dependency viewer",
+  "bin": {
+    "l4sb": "bin/l4sb.cjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "bin/",
+    "Commands/Scripts/",
+    "Graph/LeanDeclReport.lean",
+    "Graph/LeanDeclReport/",
+    "Graph/Web/",
+    "Graph/ldr_check.js",
+    "Graph/make_default_report.js",
+    "Graph/Web/js/sample.js"
+  ],
+  "scripts": {
+    "test": "node --test tests/*.test.cjs",
+    "check": "make -f Makefile.dev verify"
+  }
+}
