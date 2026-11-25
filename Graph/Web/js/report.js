@@ -914,6 +914,11 @@
       if (m.modules) out.push(`- 解析対象モジュール: ${m.modules.join(" ")}${m.extraArgs && m.extraArgs.length ? "（" + m.extraArgs.join(" ") + "）" : ""}`);
       out.push(`- 解析の場（Lake パッケージ）: ${m.target.name || "?"}${m.target.gitRev ? " @ " + m.target.gitRev.slice(0, 8) : ""}${m.target.dirty ? "（dirty）" : ""}`);
       out.push(`- toolchain: ${m.target.toolchain || "?"}`);
+      if (m.toolVersion) out.push(`- 解析ツール: ${m.toolName || "Lean4SemanticBench"} ${m.toolVersion}${m.toolDirty ? "（作業ツリーに未コミットの変更あり）" : ""}`);
+      if (m.environment && (m.environment.node || m.environment.platform)) {
+        out.push(`- 実行環境: Node ${m.environment.node || "?"} / ${m.environment.platform || "?"} ${m.environment.arch || ""}`.trim());
+      }
+      if (m.schemaVersion) out.push(`- 来歴スキーマ: ${m.schemaVersion}`);
       if (m.generatedAt) out.push(`- 生成: ${m.generatedAt}`);
     } else {
       out.push(`- 読み込んだレポート（宣言 ${S.state.order.length} 件）。来歴の記録なし`);

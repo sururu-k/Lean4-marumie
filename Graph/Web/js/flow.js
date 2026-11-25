@@ -38,6 +38,9 @@
   if(typeof module!=='undefined'&&module.exports){module.exports={layoutGraph};return;}
   const S=LDR.store;
   const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  // file:// やプライベートモードでは localStorage が例外を投げる。表示設定の保存だけなので握る
+  const lsGet=k=>{try{return localStorage.getItem(k)}catch{return null}};
+  const lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch{}};
   const fmt=new Intl.NumberFormat('ja-JP');
   const kind={theorem:'定理',def:'定義',axiom:'公理',inductive:'帰納型',constructor:'構成子',recursor:'再帰子',opaque:'opaque'};
   let host,stage,mode='layers',zoom=1,pan={x:0,y:0},auto=true,lastModel='',lastPaint='',drag=null;
@@ -107,7 +110,7 @@
     mode=value;api.active=mode==='layers';document.getElementById('canvasHost').dataset.layout=mode;
     host.hidden=!api.active;
     document.querySelectorAll('[data-layout]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.layout===mode)));
-    localStorage.setItem('ldr-graph-layout',mode);S.actions.resetView();render();
+    lsSet('ldr-graph-layout',mode);S.actions.resetView();render();
   }
   function mount(){
     host=document.getElementById('flowViewport');stage=document.getElementById('flowStage');
@@ -131,7 +134,7 @@
       if(!api.active||(!e.ctrlKey&&!e.metaKey))return;e.preventDefault();api.zoomBy(e.deltaY<0?1.1:1/1.1);
     },{passive:false});
     S.subscribe(render);new ResizeObserver(()=>{auto=true;render();}).observe(host);
-    setMode(localStorage.getItem('ldr-graph-layout')==='radial'?'radial':'layers');
+    setMode(lsGet('ldr-graph-layout')==='radial'?'radial':'layers');
   }
   Object.assign(api,{mount,render,reset(){auto=false;host.scrollTop=0;host.scrollLeft=0;fit(true);transform();},zoomBy(f){auto=false;const old=zoom;zoom=Math.max(.3,Math.min(2.5,zoom*f));pan.x=host.clientWidth/2-(host.clientWidth/2-pan.x)*zoom/old;pan.y=host.clientHeight/2-(host.clientHeight/2-pan.y)*zoom/old;transform();}});
   LDR.flow=api;

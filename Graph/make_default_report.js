@@ -14,6 +14,7 @@
    レポートと同じく、生成物であって版に載せるものではない。 */
 const fs = require("fs");
 const path = require("path");
+const crypto = require("crypto");
 
 const src = process.argv[2]
   ? path.resolve(process.cwd(), process.argv[2])
@@ -41,10 +42,18 @@ if (fs.existsSync(metaPath)) {
   try {
     const meta = JSON.parse(fs.readFileSync(metaPath, "utf8"));
     const actual = text.split("\n").filter((l) => l.trim()).length;
-    if (meta.declCount === actual) {
+    const bytes = Buffer.byteLength(text);
+    const sha256 = crypto.createHash("sha256").update(text).digest("hex");
+    const stale = meta.declCount !== actual
+      || (meta.bytes != null && meta.bytes !== bytes)
+      || (meta.sha256 != null && meta.sha256 !== sha256);
+    if (!stale) {
       metaJs = "window.LDR.DEFAULT_META = " + JSON.stringify(meta) + ";\n";
     } else {
-      console.error(`来歴の宣言数 (${meta.declCount}) が実際の行数 (${actual}) と一致しないため、来歴は埋め込みません`);
+      console.error("来歴がレポート本体と一致しないため、来歴は埋め込みません"
+        + `（宣言数 ${meta.declCount}/${actual}`
+        + (meta.bytes != null ? `・バイト数 ${meta.bytes}/${bytes}` : "")
+        + (meta.sha256 != null ? "・sha256" : "") + "）");
     }
   } catch (e) { /* 来歴が読めなくてもレポートの埋め込みは続ける */ }
 }

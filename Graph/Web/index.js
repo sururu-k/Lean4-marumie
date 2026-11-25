@@ -18,10 +18,20 @@
   }
   LDR.toast = toast;     // キャンバス側（固定で開いている由来を押したとき等）も同じ通知を使う
 
+  /* ---------- 保存領域 ----------
+     file:// や Safari のプライベートモードでは localStorage が例外を投げる。
+     設定が保存できないだけで画面まで止まる理由は無いので、読み書きを包む。 */
+  function lsGet(k) {
+    try { return localStorage.getItem(k); } catch (e) { return null; }
+  }
+  function lsSet(k, v) {
+    try { localStorage.setItem(k, v); } catch (e) { /* 保存できなくても続行 */ }
+  }
+
   /* ---------- テーマ ---------- */
   function applyTheme(dark) {
     document.documentElement.classList.toggle("dark", dark);
-    localStorage.setItem("ldr-theme", dark ? "dark" : "light");
+    lsSet("ldr-theme", dark ? "dark" : "light");
     $("themeBtn").setAttribute("aria-pressed", String(dark));
     P.invalidate();          // 配色に依存した HTML を組み直す
     S.refresh();
@@ -89,16 +99,67 @@
   /* ---------- キーボード ---------- */
   function onKey(e) {
     const tag = e.target && e.target.tagName;
-    if (tag === "INPUT" || tag === "TEXTAREA") {
+    const typing = tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT"
+      || (e.target && e.target.isContentEditable);
+    // 開いているダイアログの中では、そのダイアログの操作だけを許す
+    // （背景のグラフがショートカットで動くと、読んでいる内容と操作が食い違う）。
+    if (document.querySelector("dialog[open]")) {
+      if (e.key === "Escape") return;       // 各 dialog の close に任せる
+      return;
+    }
+    if (typing) {
+      // 検索欄では Enter / ↓ で結果へ移り、Esc で入力を消す
+      if (e.target && e.target.id === "search") {
+        if (e.key === "Enter" || e.key === "ArrowDown") {
+          const first = document.querySelector('#declList [data-sel]');
+          if (first) {
+            e.preventDefault();
+            if (e.key === "Enter") S.actions.navigate(first.dataset.sel);
+            else first.focus();
+            return;
+          }
+        }
+        if (e.key === "Escape") {
+          e.preventDefault();
+          if (e.target.value) { e.target.value = ""; S.actions.setQuery(""); }
+          else e.target.blur();
+          return;
+        }
+      }
       if (e.key === "Escape") e.target.blur();
       return;
     }
+    // 一覧の行は roving focus ではないので、↑↓ で見えている行を辿る。
+    // Shift+Enter はキャンバスと同じ「中心にする」。
+    if (tag === "BUTTON" && e.target.matches("#declList [data-sel]")) {
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        const rows = [...document.querySelectorAll("#declList [data-sel]")];
+        const i = rows.indexOf(e.target);
+        const next = rows[i + (e.key === "ArrowDown" ? 1 : -1)];
+        if (next) { e.preventDefault(); next.focus(); }
+        return;
+      }
+      if (e.key === "Enter" && e.shiftKey) {
+        e.preventDefault(); S.actions.navigate(e.target.dataset.sel); return;
+      }
+    }
+    // ボタン・リンク・summary にフォーカスがあるときの一文字ショートカットは、
+    // その部品の操作（Enter/Space）と取り違えやすいので発動しない。
+    const interactive = tag === "BUTTON" || tag === "A" || tag === "SUMMARY";
     const k = e.key.toLowerCase();
     // 探索履歴の上り下り。木なので「戻る」は親、「進む」は最後に降りた子。
     if ((e.ctrlKey || e.metaKey) && k === "z" && !e.shiftKey) { e.preventDefault(); S.actions.back(); return; }
     if ((e.ctrlKey || e.metaKey) && (k === "y" || (k === "z" && e.shiftKey))) { e.preventDefault(); S.actions.forward(); return; }
+    if ((e.ctrlKey || e.metaKey) && k === "k") {
+      e.preventDefault();
+      if ($("sidebar").classList.contains("hidden")) toggleAside($("sidebar"), "left");
+      $("search").focus();
+      return;
+    }
     if (e.ctrlKey || e.metaKey) return;
 
+    // 検索と移動は、ボタンにフォーカスが残っていても使えるようにする
+    // （レポートを閉じた直後は「レポート」ボタンにフォーカスが戻る。実測）。
     if (e.key === "/") { e.preventDefault(); if ($("sidebar").classList.contains("hidden")) toggleAside($("sidebar"), "left"); $("search").focus(); return; }
     if (e.key === "Backspace" || (e.altKey && e.key === "ArrowLeft")) { e.preventDefault(); S.actions.back(); return; }
     if (e.altKey && e.key === "ArrowRight") { e.preventDefault(); S.actions.forward(); return; }
@@ -109,6 +170,8 @@
     // プレビューの履歴（見た宣言の列）を戻る／進む。中心の履歴（Ctrl+Z / Y）とは別
     if (e.key === "[") { S.actions.previewBack(); return; }
     if (e.key === "]") { S.actions.previewForward(); return; }
+    // 一文字の切替は、ボタン等の操作と衝突しやすいので、その上では発動しない
+    if (interactive) return;
     if (k === "f") { toggleFocus(); return; }
     if (k === "t") { S.actions.setEdgeMode(S.state.edgeMode === "all" ? "type" : "all"); return; }
     if (k === "m") { S.actions.setGranularity(S.state.granularity === "decl" ? "module" : "decl"); return; }
@@ -147,13 +210,13 @@
       start = null;
       el.classList.remove("on");
       document.body.classList.remove("noselect");
-      localStorage.setItem("ldr-w-" + which, target.style.width);
+      lsSet("ldr-w-" + which, target.style.width);
     };
     el.addEventListener("pointerup", end);
     el.addEventListener("pointercancel", end);
     el.addEventListener("dblclick", () => {
       target.style.width = which === "left" ? "280px" : "330px";
-      localStorage.setItem("ldr-w-" + which, target.style.width);
+      lsSet("ldr-w-" + which, target.style.width);
     });
   }
 
@@ -219,7 +282,7 @@
 
   /* ---------- 起動 ---------- */
   async function boot() {
-    const saved = localStorage.getItem("ldr-theme");
+    const saved = lsGet("ldr-theme");
     const prefersDark = typeof window.matchMedia === "function"
       && window.matchMedia("(prefers-color-scheme: dark)").matches;
     document.documentElement.classList.toggle("dark", saved ? saved === "dark" : prefersDark);
@@ -229,7 +292,7 @@
        広げたままの値で中央が潰れることがある。画面幅に対する上限で抑える。 */
     for (const which of ["left", "right"]) {
       const el = which === "left" ? $("sidebar") : $("sideR");
-      const saved = parseInt(localStorage.getItem("ldr-w-" + which) || "", 10);
+      const saved = parseInt(lsGet("ldr-w-" + which) || "", 10);
       /* 下限は内容の自然な幅（左: 絞り込みの札、右: 依存のタブ列）。上限は画面幅に対する割合だが、
          下限より小さくはしない（190px まで縮めると札が欄からはみ出した。実測）。
          幅が足りない画面では左の一覧は重ね表示（drawer）になるので、ここでの上限は三枚並ぶ画面の話 */
@@ -264,13 +327,13 @@
     } catch (e) { /* 保持が使えなくても動作は続ける */ }
     const def = await getDefaultReport();
     const defFp = def ? fingerprint(def) : null;
-    const seenFp = localStorage.getItem("ldr-default-fp");
+    const seenFp = lsGet("ldr-default-fp");
     if (def && defFp !== seenFp) {
       initial = def;
       source = seenFp
         ? "既定の監査結果が更新されていたので読み込みました（前回の保持データは置き換え）"
         : "既定の監査結果を読み込みました";
-      localStorage.setItem("ldr-default-fp", defFp);
+      lsSet("ldr-default-fp", defFp);
       saveData(def);
     } else if (persisted) {
       initial = persisted;
@@ -395,6 +458,8 @@
           + (m.target.dirty ? "（dirty: 未コミットの変更あり）" : "")
           + ` · ${m.target.toolchain || "?"}`
           + (m.modules ? ` · ${m.modules.join(" ")}` : "")
+          + (m.toolVersion ? ` · l4sb ${m.toolVersion}` : "")
+          + (m.schemaVersion ? ` · schema ${m.schemaVersion}` : "")
           + (m.generatedAt ? ` · ${m.generatedAt}` : "");
       }
       $("dataStatus").textContent = status;
@@ -514,6 +579,12 @@
       reportOpts.kind = st.selected && st.selected !== dv.center ? "selected" : "center";
       renderReportPanel();
       previewReport();
+      // 差し込みはモーダルではないので、開いた後にフォーカスを移し、
+      // 閉じたら元のボタンへ戻す（キーボードだけでも往復できる）。
+      $("btnReport").setAttribute("aria-expanded", "true");
+      // show() は最初の操作可能要素へ自動でフォーカスする。閉じるボタンへ移すのは
+      // その後に確定させる（同期の focus() だけだと上書きされる実測）。
+      requestAnimationFrame(() => $("reportDlgClose").focus());
     };
     $("btnReport").addEventListener("click", openReport);
     $("reportOpts").addEventListener("click", (e) => {
@@ -538,6 +609,10 @@
       toast("レポートを保存しました");
     });
     $("reportDlgClose").addEventListener("click", () => $("reportDlg").close());
+    $("reportDlg").addEventListener("close", () => {
+      $("btnReport").setAttribute("aria-expanded", "false");
+      $("btnReport").focus();
+    });
   }
 
   /* 幅に応じてパネルを自動で畳む。
@@ -615,31 +690,53 @@
   let focusOn = false, focusSaved = null;
   function toggleFocus() {
     focusOn = !focusOn;
-    const side = $("sidebar"), rz = document.querySelector('[data-resize="left"]');
+    const side = $("sidebar"), right = $("sideR"), rz = document.querySelector('[data-resize="left"]');
+    const rrz = document.querySelector('[data-resize="right"]');
     const bar = document.getElementById("toolRow");
     if (focusOn) {
-      focusSaved = { side: side.classList.contains("hidden"), r: $("sideR").style.width };
+      /* 入る前の状態をそのまま覚える。以前は左の hidden だけを控えて戻し忘れ、
+         集中を解除しても利用者が閉じていたパネルが開き直っていた（実測）。 */
+      focusSaved = {
+        leftHidden: side.classList.contains("hidden"),
+        rightHidden: right.classList.contains("hidden"),
+        rightWidth: right.style.width,
+        inspectorHidden: $("inspector").classList.contains("hidden"),
+        leftResizerHidden: !!rz && rz.classList.contains("hidden"),
+        rightResizerHidden: !!rrz && rrz.classList.contains("hidden"),
+      };
       side.classList.add("hidden");
       side.classList.remove("drawer");
       if (rz) rz.classList.add("hidden");
       // 操作列は消さず、キャンバスの上に浮かせて残す。詳しい制御は「表示 ▾」に畳んである
       if (bar) bar.classList.add("focus-min");
       $("inspector").classList.add("hidden");
-      $("sideR").classList.remove("hidden");
-      $("sideR").style.width = Math.max(420, Math.round(window.innerWidth * 0.38)) + "px";
+      right.classList.remove("hidden");
+      if (rrz) rrz.classList.remove("hidden");
+      right.style.width = Math.max(420, Math.round(window.innerWidth * 0.38)) + "px";
       S.actions.setPreviewFollow(true);
       $("depTabs").dataset.tab = "prev";
       S.refresh();
     } else {
       if (bar) bar.classList.remove("focus-min");
-      $("inspector").classList.remove("hidden");
-      if (focusSaved && focusSaved.r) $("sideR").style.width = focusSaved.r;
-      autoState = null;           // 幅に応じた自動制御をやり直させる
-      applyResponsive();
+      if (focusSaved) {
+        side.classList.toggle("hidden", focusSaved.leftHidden);
+        side.classList.remove("drawer");
+        right.classList.toggle("hidden", focusSaved.rightHidden);
+        $("inspector").classList.toggle("hidden", focusSaved.inspectorHidden);
+        right.style.width = focusSaved.rightWidth || "";
+        if (rz) rz.classList.toggle("hidden", focusSaved.leftResizerHidden);
+        if (rrz) rrz.classList.toggle("hidden", focusSaved.rightResizerHidden);
+      } else {
+        $("inspector").classList.remove("hidden");
+      }
+      autoState = null;
+      syncDrawer();
+      fitWidths();
     }
     $("btnFocus").classList.toggle("bg-indigo-600", focusOn);
     $("btnFocus").classList.toggle("text-white", focusOn);
     $("btnFocus").classList.toggle("border-indigo-600", focusOn);
+    $("btnFocus").setAttribute("aria-pressed", String(focusOn));
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);

@@ -35,6 +35,8 @@ verify:
 	bash -n Commands/Scripts/l4sb.sh
 	node --check Commands/Scripts/lib/target_info.js
 	node --check Commands/Scripts/lib/verify_manifest.js
+	node --check Commands/Scripts/lib/doctor.js
+	node --check bin/l4sb.cjs
 	node --check Graph/ldr_check.js
 	node --check Graph/ldr_render_check.js
 	node --check Graph/make_default_report.js
@@ -47,8 +49,10 @@ verify:
 	node --check Graph/Web/js/store.js
 	node --check Graph/Web/js/canvas.js
 	node --check Graph/Web/js/panels.js
-	node --check Graph/Web/js/report.js
 	node --check Graph/Web/js/persist.js
+	node --check Graph/Web/js/report.js
+	node --check scripts/test-web.cjs
+	node --check scripts/test-web-states.cjs
 	@echo "verify: OK"
 
 # 自己解析。対象がモジュール LeanDeclReport を提供するため衛星は使えない

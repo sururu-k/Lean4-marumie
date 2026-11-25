@@ -1,8 +1,13 @@
 {
   "name": "lean4-marumie",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
+  "license": "MIT",
   "description": "Lean project declaration reports and an offline dependency viewer",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sururu-k/Lean4-marumie.git"
+  },
   "bin": {
     "l4sb": "bin/l4sb.cjs"
   },

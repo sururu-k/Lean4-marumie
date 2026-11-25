@@ -26,6 +26,7 @@ l4sb.sh report <target-dir> <Module>...     # 解析して report.jsonl + report
 l4sb.sh check  <target-dir>                 # ldr_check.js で不変条件を検査
 l4sb.sh web    <target-dir>                 # レポートをビューアへ埋め込み(file:// で開くだけ)
 l4sb.sh clean  <target-dir>                 # 衛星を完全削除(対象には何も残らない)
+l4sb.sh doctor [<target-dir>] [--json]      # 環境・対象・出力を診断(ビルドしない)
 ```
 
 `report` の追加指定:
@@ -40,6 +41,21 @@ l4sb.sh report <target> -- --values 2000           # 証明項の抜粋を含め
 
 出力の契約: 進捗や lake の出力は全て **stderr**。`report` の **stdout は
 レポートのパスただ一行**なので、`rep=$(l4sb.sh report <dir> <Mod>)` がそのまま使える。
+`report` は一時ファイルに書き、全行が `name` を持つ JSON であることを検証してから
+`report.jsonl` を置き換える。途中で失敗しても直前の正しいレポートは残る。
+
+### 来歴 `report.meta.json`
+
+`report.jsonl` と同じディレクトリに、次の情報を残す（`schemaVersion: 2`）。
+
+- `toolName` / `toolVersion` / `toolGitRev` / `toolDirty`: 解析器の版と作業ツリーの状態
+- `target.name` / `target.gitRev` / `target.dirty` / `target.toolchain`: 解析の場
+- `modules`, `extraArgs`: 解析対象と `decl_report` への透過引数
+- `generatedAt`, `declCount`, `bytes`, `sha256`: レポート本体の同定
+- `environment`: Node.js の版、OS、arch、toolchain
+
+絶対パスは記録しない。ビューアは `declCount`・`bytes`・`sha256` が実際の
+レポートと一致するときだけ来歴を埋め込む（`Graph/make_default_report.js`）。
 
 ## 設計原理: 環境同一性
 
@@ -73,6 +89,21 @@ manifest は公式の `lake update` に書かせ、その直後に**事後検証
 衛星と対象の両 manifest に現れる同名パッケージの rev が完全一致すること。
 不一致が出た場合は対象側のロックへの復元を試みた上で**必ず停止**する。
 黙って間違った環境を解析することはない。
+
+## 環境の診断
+
+`doctor` はビルドも `lake update` もせず、次の項目を検査する。
+
+- Node.js 18 以上、bash、git、lake、lean、elan の有無と版
+- 同梱ファイル（ビューアの CSS・JS・解析スクリプト）の欠落
+- `package.json` と `l4sb.sh` の版の一致
+- 対象の `lean-toolchain`、`lakefile`、`lake-manifest.json`、`lean_lib`
+- 衛星の有無、`lake-manifest.json` の環境同一性（rev とパス依存の実体）
+- レポートと来歴の件数一致、`Web/index.html` の有無
+- 書き込み権限と空き容量
+
+`--json` は機械可読な結果を返し、`--strict` は警告も失敗として扱う。
+終了コードは 0（警告のみ）または 1（エラーあり）。
 
 ## 検証状態の申告
 
@@ -140,6 +171,9 @@ manifest は公式の `lake update` に書かせ、その直後に**事後検証
   黙って上書きすることはない)。
 - 衛星は解析器ソースの複写を持つ。`Graph/LeanDeclReport/` を編集した場合、
   次の `report` がハッシュ比較で検出して自動的に再複写・再ビルドする。
+- 環境同一性の検証は、同名 git 依存の rev 一致に加えて、パス依存の実体が
+  対象側と同じディレクトリを指すことまで確認する。同名パッケージの重複も
+  エラーにする（`lib/verify_manifest.js`）。
 - **信頼境界**: `lake update` / `lake build` は対象の lakefile を実行する
   (lakefile.lean は Lean プログラム)。解析は対象のビルドを伴うため、
   **信頼できる対象にのみ**使用すること。
@@ -167,6 +201,7 @@ manifest は公式の `lake update` に書かせ、その直後に**事後検証
 Commands/Scripts/
 ├── l4sb.sh                 本体(bash)
 ├── lib/target_info.js      対象の内省(名前・toolchain・lean_lib・依存の有無)
-├── lib/verify_manifest.js  環境同一性の事後検証
+├── lib/verify_manifest.js  環境同一性の事後検証(rev・パス依存・重複)
+├── lib/doctor.js           環境と対象の診断(--json / --strict)
 └── README.md               この文書
 ```

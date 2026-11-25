@@ -14,7 +14,8 @@ test('installed command works from another directory and preserves errors', () =
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'l4sb cli '));
   try {
     assert.equal(run(['--help'], dir).status, 0);
-    assert.match(run(['--version'], dir).stdout, /0\.2\.0/);
+    const version = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8')).version;
+    assert.equal(run(['--version'], dir).stdout.trim(), `l4sb ${version}`);
     assert.notEqual(run(['unknown'], dir).status, 0);
     const result = run(['all'], dir);
     assert.notEqual(result.status, 0);

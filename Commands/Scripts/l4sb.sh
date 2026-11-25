@@ -32,7 +32,7 @@
 # ============================================================
 set -euo pipefail
 
-L4SB_VERSION="0.2.0"
+L4SB_VERSION="0.3.0"
 PROG="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd -- "$SCRIPT_DIR/../.." && pwd)"
@@ -54,6 +54,7 @@ $PROG — Lean4SemanticBench 展開コマンド v$L4SB_VERSION
   $PROG web    [<report.jsonl> | <target-dir>]
   $PROG all    <target-dir> [report と同じ引数...]
   $PROG clean  <target-dir> [--purge]
+  $PROG doctor [<target-dir>] [--json] [--strict]
 
   init    対象の内側に衛星ワークスペース <target>/$SAT_DIRNAME/ を生成する(冪等)
   report  対象をビルドし(=対象の .lake/build を更新する)、decl_report で
@@ -62,6 +63,7 @@ $PROG — Lean4SemanticBench 展開コマンド v$L4SB_VERSION
   web     レポートの隣に Web/ を生成する(file:// で開くだけ)
   all     init → report → check → web を一括で行う(引数は report へ透過)
   clean   衛星を完全に削除する(対象には何も残らない)
+  doctor  実行環境と対象の準備状態を診断する(ビルドはしない)
 
 詳細: Commands/Scripts/README.md
 EOF
@@ -294,7 +296,7 @@ cmd_init() {
 # ロックへ checkout で復元を試みた上で、必ず停止する。
 verify_identity() {  # $1 = target, $2 = sat
   local target="$1" sat="$2" out rc=0
-  out="$(node "$LIB_DIR/verify_manifest.js" "$target" "$sat")" || rc=$?
+  out="$(node "$LIB_DIR/verify_manifest.js" "$target" "$sat" "${L4SB_NAME:-}")" || rc=$?
   local kind name rev_target rev_sat
   while IFS=' ' read -r kind name rev_target rev_sat; do
     case "$kind" in
@@ -402,59 +404,91 @@ cmd_report() {
     return 0
   fi
 
-  local report="$sat/report.jsonl"
+  local report="$sat/report.jsonl" tmp="$sat/.report.jsonl.tmp"
   info "解析を実行します: decl_report ${mods[*]}${pass[0]:+ ${pass[*]}}"
-  ( cd "$sat" && lake env "$bin" "${mods[@]}" ${pass[@]+"${pass[@]}"} > report.jsonl ) \
-    || die "$run_hint"
-  [ -s "$report" ] || die "レポートが空です(モジュール名が正しいか確認してください: ${mods[*]})"
+  # 一時ファイルへ書き、検証してから置き換える。途中で落ちても、直前の正しい
+  # レポートを壊さない(部分書き込みを「最新」として残さない)。
+  rm -f "$tmp"
+  if ! ( cd "$sat" && lake env "$bin" "${mods[@]}" ${pass[@]+"${pass[@]}"} > "$tmp" ); then
+    rm -f "$tmp"
+    die "$run_hint"
+  fi
+  [ -s "$tmp" ] || { rm -f "$tmp"; die "レポートが空です(モジュール名が正しいか確認してください: ${mods[*]})"; }
   # 事後検証: 全行が name を持つ JSON であること。stdout 汚染・部分書き込みの
   # 有無を議論でなく機械検査で潰す(check を経ない素の report でも保証する)。
-  node -e '
+  if ! node -e '
     const fs = require("fs");
     const lines = fs.readFileSync(process.argv[1], "utf8").split("\n").filter((l) => l.trim());
     let bad = 0;
     lines.forEach((l, i) => {
       try { if (!JSON.parse(l).name) throw 0; }
-      catch { console.error(`  ${i + 1} 行目が JSON として不正です`); bad = 1; }
+      catch { if (bad < 5) console.error(`  ${i + 1} 行目が JSON として不正です`); bad = 1; }
     });
     process.exit(bad);
-  ' "$report" || die "生成された JSONL に不正な行があります(stdout 汚染・部分書き込みの疑い)"
+  ' "$tmp"; then
+    rm -f "$tmp"
+    die "生成された JSONL に不正な行があります(stdout 汚染・部分書き込みの疑い)"
+  fi
+  mv -f "$tmp" "$report"
 
   # 来歴サイドカー。ベンチとして比較可能にするため、何をいつどの環境で
   # 解析したかを機械可読で残す(本体 JSONL の決定的順序には手を触れない)。
   # 絶対パスは記録しない(公開共有時のローカル情報漏れ。名前+rev で同定は足りる)。
   # 作業ツリーが dirty なら旗を立てる — dirty のとき gitRev 単独では嘘になるため。
-  local tool_rev target_rev target_dirty=""
+  local tool_rev target_rev target_dirty="" tool_dirty=""
   tool_rev="$(git -C "$ROOT_DIR" rev-parse --short HEAD 2>/dev/null || echo unknown)"
   target_rev="$(git -C "$target" rev-parse HEAD 2>/dev/null || echo "")"
   if [ -n "$target_rev" ] && [ -n "$(git -C "$target" status --porcelain 2>/dev/null)" ]; then
     target_dirty=1
   fi
+  if [ -n "$(git -C "$ROOT_DIR" status --porcelain 2>/dev/null)" ]; then
+    tool_dirty=1
+  fi
   L4SB_M_TOOLVER="$L4SB_VERSION+$tool_rev" \
+  L4SB_M_TOOLREV="$tool_rev" L4SB_M_TOOLDIRTY="$tool_dirty" \
   L4SB_M_TARGET="$L4SB_NAME" L4SB_M_TARGETREV="$target_rev" \
   L4SB_M_DIRTY="$target_dirty" \
   L4SB_M_TOOLCHAIN="$L4SB_TOOLCHAIN" L4SB_M_MODULES="${mods[*]}" \
   L4SB_M_EXTRA="${pass[*]:-}" \
-  L4SB_M_REPORT="$report" \
+  L4SB_M_REPORT="$report" L4SB_M_META="$sat/report.meta.json" \
+  L4SB_M_COMMAND="report" \
   node -e '
-    const fs = require("fs"), e = process.env;
+    const fs = require("fs"), crypto = require("crypto"), e = process.env;
     const text = fs.readFileSync(e.L4SB_M_REPORT, "utf8");
     const lines = text.split("\n").filter((l) => l.trim());
     const meta = {
+      schemaVersion: 2,
+      // tool は従来の文字列表現を保つ(既存の読み手との互換)。詳細は tool* 欄。
       tool: "Lean4SemanticBench", version: e.L4SB_M_TOOLVER,
+      toolName: "Lean4SemanticBench",
+      toolVersion: e.L4SB_M_TOOLVER,
+      toolGitRev: e.L4SB_M_TOOLREV || null,
+      // ツール側の作業ツリーが dirty なら、版だけでは再現性を主張できない
+      toolDirty: e.L4SB_M_TOOLDIRTY === "1",
       target: { name: e.L4SB_M_TARGET,
                 gitRev: e.L4SB_M_TARGETREV || null,
                 // dirty: rev の指すコミットに未反映の変更がある(再現性の限定)
                 dirty: e.L4SB_M_DIRTY === "1",
                 toolchain: e.L4SB_M_TOOLCHAIN },
-      modules: e.L4SB_M_MODULES.split(" "),
+      modules: e.L4SB_M_MODULES.split(" ").filter(Boolean),
       // decl_report への透過引数(--values 等はレポート内容に影響する入力)
-      extraArgs: e.L4SB_M_EXTRA ? e.L4SB_M_EXTRA.split(" ") : [],
+      extraArgs: e.L4SB_M_EXTRA ? e.L4SB_M_EXTRA.split(" ").filter(Boolean) : [],
       generatedAt: new Date().toISOString(),
-      declCount: lines.length, bytes: Buffer.byteLength(text),
+      environment: {
+        node: process.version,
+        platform: process.platform,
+        arch: process.arch,
+        toolchain: e.L4SB_M_TOOLCHAIN,
+      },
+      command: e.L4SB_M_COMMAND || "report",
+      declCount: lines.length,
+      bytes: Buffer.byteLength(text),
+      sha256: crypto.createHash("sha256").update(text).digest("hex"),
     };
-    fs.writeFileSync(e.L4SB_M_REPORT.replace(/\.jsonl$/, ".meta.json"),
-                     JSON.stringify(meta, null, 2) + "\n");
+    const out = e.L4SB_M_META || e.L4SB_M_REPORT.replace(/\.jsonl$/, ".meta.json");
+    const tmp = out + ".tmp";
+    fs.writeFileSync(tmp, JSON.stringify(meta, null, 2) + "\n");
+    fs.renameSync(tmp, out);
   '
 
   local n
@@ -540,6 +574,12 @@ cmd_all() {
   fi
 }
 
+# ---------- doctor ----------
+cmd_doctor() {
+  command -v node >/dev/null 2>&1 || die "node が見つかりません(doctor の実行に必要です)"
+  node "$LIB_DIR/doctor.js" "$@"
+}
+
 # ---------- clean ----------
 # 既定は衛星のみ削除。--purge を付けると、衛星が共有 packagesDir へ持ち込んだ
 # 「対象の manifest に無いパッケージ」(依存ゼロの対象での importGraph / Cli 等)
@@ -590,7 +630,8 @@ case "${1:-help}" in
   web)     shift; cmd_web "$@" ;;
   all)     shift; cmd_all "$@" ;;
   clean)   shift; cmd_clean "$@" ;;
-  version) echo "$PROG $L4SB_VERSION" ;;
+  doctor)  shift; cmd_doctor "$@" ;;
+  version|--version|-v) echo "$PROG $L4SB_VERSION" ;;
   help|-h|--help) usage ;;
   *) die "不明なサブコマンド: $1 ('$PROG help' で使い方を表示)" ;;
 esac

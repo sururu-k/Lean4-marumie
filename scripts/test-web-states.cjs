@@ -22,10 +22,40 @@ const path=require('node:path');
   assert.match(await p.locator('.flow-node-label').innerText(),/long_declaration/);
   assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
   await p.locator('#btnReport').click();await p.waitForFunction(()=>document.getElementById('reportText').value.length>0);
+  assert.equal(await p.evaluate(()=>document.activeElement.id),'reportDlgClose','report should move focus into the dialog');
+  assert.equal(await p.locator('#btnReport').getAttribute('aria-expanded'),'true');
   if(width<700){assert.equal(await p.locator('#reportOpts').isVisible(),false);await p.locator('#reportOptionsToggle').click();assert.equal(await p.locator('#reportOpts').isVisible(),true);await p.locator('#reportOptionsToggle').click();}
+  const edgeBefore=await p.evaluate(()=>LDR.store.state.edgeMode);
+  await p.keyboard.press('t'); // dialog が開いている間は背景のショートカットを止める
+  assert.equal(await p.evaluate(()=>LDR.store.state.edgeMode),edgeBefore);
   await p.locator('#reportDlgClose').click();
-  await p.keyboard.press('/');await p.waitForTimeout(50);assert.equal(await p.locator('#search').evaluate(e=>document.activeElement===e),true);
-  assert.deepEqual(errors,[]);console.log(`${width}px: invalid input retained data; empty, dense, long name, report settings, keyboard search, reduced motion OK`);
+  assert.equal(await p.evaluate(()=>document.activeElement.id),'btnReport','focus should return to the opener');
+  await p.waitForFunction(()=>document.getElementById('btnReport').getAttribute('aria-expanded')==='false');
+
+  // 検索から Enter で最初の結果へ移れる（直前の長い名前のデータをサンプルへ戻す）
+  await p.evaluate(()=>LDR.store.actions.loadText(LDR.SAMPLE));
+  await p.waitForSelector('[data-flow-node]');
+  await p.keyboard.press('/');await p.waitForTimeout(50);
+  assert.equal(await p.locator('#search').evaluate(e=>document.activeElement===e),true);
+  await p.locator('#search').fill('meet_comm');
+  await p.keyboard.press('Enter');
+  await p.waitForFunction(()=>LDR.store.derived.center==='Examples.meet_comm');
+  await p.keyboard.press('Escape');
+  assert.equal(await p.locator('#search').inputValue(),'');
+  assert.equal(await p.evaluate(()=>LDR.store.state.query),'');
+
+  // 集中表示は、入る前に閉じていたパネルを閉じたまま戻す
+  if(width>=700){
+    await p.locator('#btnSide').click();
+    assert.equal(await p.locator('#sidebar').isHidden(),true);
+    await p.locator('#btnFocus').click();
+    assert.equal(await p.locator('#btnFocus').getAttribute('aria-pressed'),'true');
+    await p.locator('#btnFocus').click();
+    assert.equal(await p.locator('#btnFocus').getAttribute('aria-pressed'),'false');
+    assert.equal(await p.locator('#sidebar').isHidden(),true,'focus exit must not reopen a closed sidebar');
+    await p.locator('#btnSide').click();
+  }
+  assert.deepEqual(errors,[]);console.log(`${width}px: invalid input retained data; empty, dense, long name, report settings/focus, keyboard search, focus restore, reduced motion OK`);
   await p.close();
  }}finally{await b.close()}
 })().catch(e=>{console.error(e);process.exit(1)});
